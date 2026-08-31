@@ -4,225 +4,628 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Nikhil Kapadia</title>
+<meta name="description" content="Nikhil Kapadia, senior software engineer. I run fleets of AI coding agents and build the verification systems that make their output trustworthy.">
+<meta property="og:title" content="Nikhil Kapadia · Agent Orchestrator">
+<meta property="og:description" content="Senior software engineer. I run fleets of AI coding agents and build the enforcement layer that makes their output trustworthy.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://nikhilkapadia.com">
+<meta name="theme-color" content="#0a0e1a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='72' font-size='56' font-weight='bold' font-family='Menlo, monospace' fill='%23d9b45b' text-anchor='middle'%3ENaN%3C/text%3E%3C/svg%3E">
 <style>
   :root {
-    --bg: #0d1117;
-    --bg-raise: #151b23;
-    --border: #232c37;
-    --text: #dbe2ea;
-    --muted: #8b97a5;
-    --accent: #5cc8a5;
-    --accent-dim: #2e5f50;
+    --bg: #0a0e1a;
+    --panel: rgba(13, 22, 41, .82);
+    --line: #1e3a66;
+    --line-bright: #3d6fb8;
+    --glow: rgba(77, 163, 255, .14);
+    --text: #c9d6e8;
+    --dim: #6d829e;
+    --sys: #4da3ff;
+    --gold: #d9b45b;
     --mono: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
   body {
     background: var(--bg);
+    background-image:
+      radial-gradient(ellipse 70% 40% at 50% -5%, rgba(61,111,184,.12), transparent),
+      radial-gradient(ellipse 50% 35% at 90% 105%, rgba(90,60,160,.07), transparent);
     color: var(--text);
-    font: 17px/1.65 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-  }
-  .wrap { max-width: 760px; margin: 0 auto; padding: 0 28px; }
-
-  header { padding: 96px 0 72px; border-bottom: 1px solid var(--border); }
-  .kicker {
     font-family: var(--mono);
-    font-size: 13px;
-    color: var(--accent);
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    margin-bottom: 20px;
+    font-size: 14.5px;
+    line-height: 1.75;
+    min-height: 100vh;
   }
-  h1 { font-size: 44px; line-height: 1.15; letter-spacing: -.02em; font-weight: 700; }
-  .tagline { font-size: 22px; color: var(--muted); margin-top: 18px; max-width: 40ch; }
-  .tagline strong { color: var(--text); font-weight: 600; }
-  nav { margin-top: 36px; display: flex; gap: 22px; flex-wrap: wrap; }
-  nav a {
-    font-family: var(--mono); font-size: 13px;
-    color: var(--muted); text-decoration: none;
-    border-bottom: 1px solid transparent; padding-bottom: 2px;
-  }
-  nav a:hover { color: var(--accent); border-color: var(--accent-dim); }
 
-  section { padding: 64px 0; border-bottom: 1px solid var(--border); }
-  h2 { font-size: 15px; font-family: var(--mono); color: var(--accent);
-       text-transform: uppercase; letter-spacing: .08em; margin-bottom: 28px; }
-  h3 { font-size: 21px; margin: 34px 0 10px; letter-spacing: -.01em; }
-  p { margin-bottom: 16px; }
-  p.lead { font-size: 19px; }
-  .muted { color: var(--muted); }
-  a { color: var(--accent); text-decoration: none; }
+  /* ============ layout: game menu ============ */
+  .app {
+    display: flex; gap: 26px; align-items: flex-start;
+    max-width: 1160px; margin: 0 auto; padding: 44px 22px 120px;
+  }
+  .side { width: 216px; flex-shrink: 0; position: sticky; top: 44px; }
+  .main { flex: 1; min-width: 0; }
+
+  /* ============ the system panel ============ */
+  .win {
+    position: relative;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    box-shadow: 0 0 24px var(--glow), inset 0 0 24px rgba(77,163,255,.03);
+    backdrop-filter: blur(10px);
+    margin-bottom: 24px;
+    opacity: 0;
+    transform: scaleX(0) scaleY(.04);
+    transform-origin: center;
+  }
+  .win.on { animation: lineToBox .55s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  @keyframes lineToBox {
+    0%   { opacity: 0; transform: scaleX(0) scaleY(.04); }
+    12%  { opacity: 1; }
+    45%  { transform: scaleX(1) scaleY(.04); }
+    100% { opacity: 1; transform: scaleX(1) scaleY(1); }
+  }
+  /* content stays hidden while the frame unfolds, then fades up */
+  .win .bar, .win .body, .win .menu-list {
+    opacity: 0;
+  }
+  .win.on .bar, .win.on .body, .win.on .menu-list {
+    animation: contentFade .45s ease-out .38s forwards;
+  }
+  @keyframes contentFade {
+    from { opacity: 0; transform: translateY(5px); }
+    to   { opacity: 1; transform: none; }
+  }
+  .win::before {
+    content: '';
+    position: absolute; top: -1px; left: 0;
+    width: 100%; height: 2px;
+    background: linear-gradient(90deg, transparent, #00a8ff, transparent);
+  }
+  .win .bar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--line);
+    color: var(--sys);
+    font-size: 12px; letter-spacing: .14em;
+  }
+  .win .bar .dot { color: var(--line-bright); }
+  .win .body { padding: 20px 24px; }
+  .win p { margin-bottom: 15px; }
+  .win p:last-child { margin-bottom: 0; }
+
+  .sysline { color: var(--sys); opacity: 0; }
+  .win.on .sysline { animation: materialize .7s ease-out forwards; }
+  .win.on .sysline:nth-of-type(1) { animation-delay: .4s; }
+  .win.on .sysline:nth-of-type(2) { animation-delay: .95s; }
+  .win.on .sysline:nth-of-type(3) { animation-delay: 1.5s; }
+  @keyframes materialize {
+    0%   { opacity: 0; letter-spacing: 2px; filter: blur(3px); transform: translateY(4px); }
+    70%  { opacity: .85; filter: blur(.5px); }
+    100% { opacity: 1; letter-spacing: normal; filter: blur(0); transform: translateY(0); }
+  }
+  .dim { color: var(--dim); }
+  .gold { color: var(--gold); }
+  em { color: #e8eef7; font-style: normal; }
+  a { color: var(--sys); text-decoration: none; }
   a:hover { text-decoration: underline; }
 
-  .num { font-family: var(--mono); color: var(--accent); font-weight: 600; }
-
-  .card {
-    background: var(--bg-raise);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 22px 24px;
-    margin: 18px 0;
+  /* ============ sidebar menu ============ */
+  .menu-list { list-style: none; }
+  .menu-list a {
+    display: block;
+    font-size: 13px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--dim);
+    padding: 9px 14px;
+    border-left: 2px solid transparent;
+    text-decoration: none;
+    transition: color .15s, background .15s;
   }
-  .card h4 { font-size: 17px; margin-bottom: 6px; }
-  .card .meta { font-family: var(--mono); font-size: 12.5px; color: var(--muted); margin-bottom: 10px; }
-  .card p { margin-bottom: 0; font-size: 15.5px; color: var(--text); }
-
-  blockquote {
-    border-left: 3px solid var(--accent-dim);
-    padding: 4px 0 4px 20px;
-    margin: 22px 0;
-    color: var(--muted);
-    font-size: 16px;
+  .menu-list a::before {
+    content: '◆'; font-size: 8px; margin-right: 11px;
+    color: var(--line-bright); vertical-align: 1px;
   }
-  blockquote .q { color: var(--text); font-style: italic; }
-
-  ul.rules { list-style: none; margin: 8px 0 16px; }
-  ul.rules li {
-    padding: 14px 0;
-    border-bottom: 1px dashed var(--border);
-    font-size: 16px;
+  .menu-list a:hover { color: var(--sys); text-decoration: none; }
+  .menu-list a.active {
+    color: var(--gold);
+    border-left-color: var(--gold);
+    background: rgba(217, 180, 91, .07);
   }
-  ul.rules li:last-child { border-bottom: none; }
-  ul.rules .rule { color: var(--text); font-weight: 600; }
-  ul.rules .why { color: var(--muted); display: block; font-size: 14.5px; margin-top: 3px; }
+  .menu-list a.active::before { color: var(--gold); }
 
-  footer { padding: 56px 0 80px; }
-  footer .links { display: flex; gap: 24px; margin-top: 14px; font-family: var(--mono); font-size: 14px; }
+  .mini { font-size: 12px; }
+  .mini .body { padding: 10px 16px; }
+  .mini .row { display: flex; justify-content: space-between; padding: 2px 0; }
+  .mini .row .k { color: var(--dim); letter-spacing: .1em; }
+  .mini .row .v { color: var(--sys); }
 
-  @media (max-width: 560px) {
-    h1 { font-size: 34px; }
-    .tagline { font-size: 19px; }
-    header { padding: 64px 0 48px; }
+  /* ============ sections ============ */
+  .section { display: none; }
+  .section.active { display: block; }
+  .cols { display: grid; grid-template-columns: 1fr 1.08fr; gap: 26px; align-items: start; }
+  .cols .win { margin-bottom: 24px; }
+
+  /* ============ status ============ */
+  .status-name {
+    text-align: center;
+    font-size: clamp(22px, 4vw, 30px);
+    font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase;
+    color: #e8f4ff;
+    text-shadow: 0 0 16px rgba(77, 163, 255, .6);
+    margin: 4px 0 16px;
+  }
+  .status-name .clan {
+    color: var(--gold);
+    text-shadow: 0 0 12px rgba(217, 180, 91, .5);
+    font-size: .72em;
+    letter-spacing: .06em;
+    text-transform: none; /* NaN, never NAN */
+    vertical-align: 3px;
+    margin-right: 6px;
+    cursor: help;
+  }
+  table.status { width: 100%; border-collapse: collapse; }
+  table.status td { padding: 5px 0; vertical-align: top; }
+  table.status td.k { color: var(--dim); width: 11ch; }
+
+  .bar-block { margin: 12px 0; }
+  .bar-label {
+    display: flex; justify-content: space-between;
+    font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--dim); margin-bottom: 5px;
+  }
+  .bar-label .val { color: var(--sys); }
+  .meter {
+    position: relative; height: 12px;
+    background: rgba(80, 80, 80, .35);
+    border: 1px solid var(--line-bright);
+    overflow: hidden;
+  }
+  .meter .fill {
+    height: 100%; width: 0;
+    background: linear-gradient(90deg, #2b5c9e, var(--sys));
+    box-shadow: inset 0 0 4px rgba(255, 255, 255, .5);
+    transition: width .9s ease-out;
+  }
+  .meter .fill.gold { background: linear-gradient(90deg, #8a6d2a, var(--gold)); }
+  .meter .shine {
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
+    background-size: 50% 100%; background-repeat: no-repeat;
+    animation: shine 2s linear infinite;
+    pointer-events: none;
+  }
+  @keyframes shine {
+    0% { background-position: -100% 0; }
+    100% { background-position: 220% 0; }
+  }
+  .status-div { border-top: 1px dashed var(--line); margin: 16px 0 10px; }
+
+  /* loadout: inventory grid, item grade scales with years of use */
+  .inv { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .item {
+    position: relative;
+    border: 1px solid var(--line);
+    background: rgba(10, 17, 32, .5);
+    padding: 15px 14px 13px;
+    transition: transform .18s, box-shadow .18s;
+  }
+  .item:hover { transform: translateY(-2px); box-shadow: 0 0 16px var(--glow); }
+  .item .yr {
+    position: absolute; top: 9px; right: 11px;
+    font-size: 10.5px; color: var(--dim); letter-spacing: .08em;
+  }
+  .item .nm { display: block; font-weight: 700; font-size: 14.5px; color: #e8f4ff; margin-bottom: 3px; }
+  .item .sb { display: block; font-size: 11.5px; color: var(--dim); line-height: 1.55; }
+  .item.g3 { border-color: rgba(217, 180, 91, .5); box-shadow: inset 0 0 16px rgba(217, 180, 91, .06); }
+  .item.g3 .nm, .item.g3 .yr { color: var(--gold); }
+  .item.g2 { border-color: var(--line-bright); }
+  .item.empty { border-style: dashed; opacity: .4; }
+  .inv-note { margin-top: 12px; font-size: 11px; color: var(--dim); letter-spacing: .08em; }
+
+  .foot {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+    background: rgba(10, 14, 26, .92);
+    backdrop-filter: blur(8px);
+    border-top: 1px solid var(--line);
+    text-align: center;
+    padding: 13px 22px;
+    font-size: 13px;
+  }
+  .foot a { margin: 0 4px; }
+
+  /* ============ argus ============ */
+  ul.files { list-style: none; font-size: 13.5px; margin-top: 4px; }
+  ul.files li { display: flex; gap: 16px; padding: 8px 0; border-top: 1px dashed rgba(30,58,102,.6); }
+  ul.files li:first-child { border-top: none; }
+  ul.files .fn { color: var(--sys); width: 21ch; flex-shrink: 0; }
+  ul.files .fd { color: var(--text); }
+  .rules-mini p { color: var(--dim); font-size: 13.5px; margin-bottom: 7px; }
+  .rules-mini b { color: var(--gold); font-weight: 600; }
+
+  /* ============ raid log / entries ============ */
+  .entry { padding: 16px 0; border-top: 1px dashed var(--line); }
+  .entry:first-of-type { border-top: none; padding-top: 0; }
+  .entry .tag { color: var(--gold); font-size: 11.5px; letter-spacing: .1em; }
+  .entry h3 { font-size: 15px; color: #e8eef7; margin: 4px 0 8px; font-weight: 600; }
+  .entry p { margin-bottom: 8px; }
+  .entry .result { color: var(--dim); font-size: 13px; }
+  .entry .result b { color: var(--sys); font-weight: 600; }
+
+  /* ============ career ============ */
+  ul.career { list-style: none; }
+  ul.career li { padding: 14px 0; border-top: 1px dashed var(--line); }
+  ul.career li:first-child { border-top: none; padding-top: 0; }
+  .crow { display: flex; justify-content: space-between; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .crow .role { color: #e8eef7; font-weight: 600; font-size: 14.5px; }
+  .crow .role b { color: var(--sys); font-weight: 600; }
+  .crow .when { font-size: 12px; color: var(--dim); white-space: nowrap; }
+  .cdesc { display: block; color: var(--text); font-size: 13px; margin-top: 3px; }
+
+  /* ============ side quests ============ */
+  ul.quests { list-style: none; }
+  ul.quests li { padding: 12px 0; border-top: 1px dashed var(--line); }
+  ul.quests li:first-child { border-top: none; padding-top: 0; }
+  ul.quests .qname { color: #e8eef7; font-weight: 600; }
+  ul.quests .qdesc { display: block; color: var(--text); font-size: 13px; margin-top: 2px; }
+  ul.quests .qsrc { font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); margin-left: 12px; }
+  ul.quests .qsrc:hover { color: var(--sys); }
+
+  /* ============ contact ============ */
+  .invite { text-align: center; padding: 30px 22px; }
+  .invite .links { display: flex; justify-content: center; gap: 22px; margin-top: 18px; flex-wrap: wrap; font-size: 13.5px; }
+
+  /* ============ intro popup ============ */
+  #intro {
+    position: fixed; inset: 0; z-index: 50;
+    background: rgba(5, 9, 18, .88);
+    backdrop-filter: blur(5px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 22px;
+    cursor: pointer;
+    transition: opacity .5s;
+  }
+  #intro.hide { opacity: 0; pointer-events: none; }
+  #intro .win { max-width: 540px; width: 100%; margin: 0; }
+  #intro .body { text-align: center; padding: 28px 24px; }
+  #intro .cont {
+    display: inline-block; margin-top: 16px;
+    color: var(--dim); font-size: 12px; letter-spacing: .2em;
+    animation: bob 1.6s ease-in-out infinite;
+  }
+  @keyframes bob {
+    0%, 100% { opacity: .4; transform: translateY(0); }
+    50% { opacity: .9; transform: translateY(3px); }
+  }
+
+  /* ============ responsive ============ */
+  @media (max-width: 900px) {
+    .app { flex-direction: column; }
+    .side { position: static; width: 100%; }
+    .menu-list { display: flex; flex-wrap: wrap; }
+    .menu-list a { border-left: none; border-bottom: 2px solid transparent; padding: 8px 12px; }
+    .menu-list a.active { border-bottom-color: var(--gold); }
+    .mini { display: none; }
+    .cols { grid-template-columns: 1fr; }
+    .inv { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .win, .sysline, .win .bar, .win .body, .win .menu-list { opacity: 1 !important; transform: none !important; animation: none !important; }
+    .meter .shine, #intro .cont { animation: none !important; }
+    .meter .fill { transition: none; }
   }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="wrap">
-    <div class="kicker">Software engineer</div>
-    <h1>Nikhil Kapadia</h1>
-    <p class="tagline">I run fleets of coding agents the way other people run distributed systems: <strong>with leases, gates, audits, and proof.</strong></p>
-    <nav>
-      <a href="#fleet">the agent fleet</a>
-      <a href="#audit">the evidence audit</a>
-      <a href="#tools">tools</a>
-      <a href="#how">how I work</a>
-      <a href="#contact">contact</a>
-    </nav>
-  </div>
-</header>
-
-<section>
-  <div class="wrap">
-    <h2>What I do</h2>
-    <p class="lead">Most engineers use AI coding tools. I engineer the system around them.</p>
-    <p>My day-to-day setup is a multi-model fleet. Claude orchestrates, Codex implements, and each task goes to the cheapest model tier that can handle the judgment it needs. The interesting part isn't the models. It's everything wrapped around them: write leases so two agents never fight over a worktree, acceptance tests frozen before the implementer sees them, review pipelines where every finding gets an explicit verdict of confirmed, plausible, or refuted, and a permission model where committing doesn't imply pushing and pushing doesn't imply opening a PR.</p>
-    <p>None of that came from theory. It came from watching agents claim work was done when it wasn't, then building the gate that catches it next time. My core belief after doing this for a while: anything only a human can judge is either real judgment or a missing gate, and most of it is the second kind.</p>
-  </div>
-</section>
-
-<section id="fleet">
-  <div class="wrap">
-    <h2>Case study: the agent fleet</h2>
-    <p>The centerpiece is a workflow package I maintain as its own versioned repo. It defines how autonomous agents on my machine plan, delegate, verify, and report, and a sync script generates the copies every tool actually loads. Core rules stay repo-agnostic; anything tied to a specific codebase lives in per-repo files so the general rules don't rot.</p>
-
-    <h3>Why it exists</h3>
-    <p>One ordinary review prompt once spawned <span class="num">5</span> subagents that recursively spawned <span class="num">928</span> more. 932 transcripts, 367 MB, 143 rate-limit events, from a single session. The lesson I took wasn't "be more careful." It was that prose guidance doesn't constrain anything. Caps on delegation depth and concurrency now live in harness config, where an agent can't talk its way past them.</p>
-
-    <h3>The kanban board that runs itself</h3>
-    <p>To make dispatch real, I forked an open-source agent gateway and built the enforcement layer it was missing. Along the way I found the clone was shallow and 508 commits behind upstream, so I rebased onto the real mainline first. The fork now has checkpointing with claim fencing (a successor can't grab a card until its predecessor's process actually exits), a fail-closed capability handshake between dispatcher and workers, comment-driven wake for blocked cards, and workspace leases handed out at dispatch time instead of discovered as conflicts at runtime.</p>
-    <p>Before calling the branch clean, I ran a differential test sweep: branch and base produced identical failure sets, roughly 605 pre-existing environmental failures on both sides and <span class="num">zero</span> caused by my changes. That distinction is the whole job. A green suite proves little; an unchanged failure set proves the diff.</p>
-    <p>I also made a deliberate architecture call: the fork is the product. Upstreaming individual pieces is opportunistic, done only to shrink the diff I carry. I'd rather own the rebase cadence than water down the design to fit someone else's roadmap.</p>
-  </div>
-</section>
-
-<section id="audit">
-  <div class="wrap">
-    <h2>Case study: the evidence audit</h2>
-    <p>I mined every agent transcript on my machine, across four different tools, to answer one question: do my agents actually follow the rules I wrote, or do I just believe they do?</p>
-    <p>The first pass produced numbers I almost shipped. Then an independent review found the methodology was broken, so I threw it out and did it again. Fan-out lanes wrote full replay copies of parent transcripts, inflating 180 files into what was really about 42 distinct threads. One tool logged every user prompt twice. About 76% of sessions were machine-dispatched briefs, not me. Counting complaints with regex over user text produced mostly false positives, so I measured assistant-side actions instead.</p>
-    <p>The corrected findings, each verified by hand:</p>
-    <div class="card">
-      <h4>Zero unauthorized commits or pushes</h4>
-      <p>Across <span class="num">460</span> commits and <span class="num">281</span> pushes, every one traced to explicit authorization. All 15 flagged sessions cleared on manual review.</p>
-    </div>
-    <div class="card">
-      <h4>26 sessions claimed done without running a test</h4>
-      <p>Substantial sessions that wrote files, reported success, and never verified. This is the failure mode I now design against hardest.</p>
-    </div>
-    <div class="card">
-      <h4>7 of 43 installed skills had ever been invoked</h4>
-      <p>So I cut the other 36. Tooling earns its place with usage evidence or it goes.</p>
-    </div>
-    <p>The audit also kept me honest about my own claims. The instruction files were only written mid-period, so a corpus spanning the months before can't prove the current rules work. I flagged that limit in the findings instead of quietly rounding up.</p>
-  </div>
-</section>
-
-<section id="tools">
-  <div class="wrap">
-    <h2>Tools I built because nothing else did the job</h2>
-    <div class="card">
-      <h4>pi-ui</h4>
-      <div class="meta">TypeScript, node-pty, xterm headless. No build step.</div>
-      <p>A terminal session browser and multiplexer. It scans the on-disk transcript stores of three different agent CLIs, groups sessions by project in a sidebar, and resumes any of them live in the right pane over a PTY. Sessions keep running detached in the background.</p>
-    </div>
-    <div class="card">
-      <h4>swarm review pipeline</h4>
-      <div class="meta">Two-phase adversarial review, productized.</div>
-      <p>Parallel read-only lanes emit candidate findings in a fixed format, then a fresh verifier per candidate returns confirmed, plausible, or refuted. The model that wrote the code never gets to be its only reviewer.</p>
-    </div>
-    <div class="card">
-      <h4>ui-audit</h4>
-      <div class="meta">Branch-parity differ.</div>
-      <p>Compares a framework-upgrade branch against the staging environment screen by screen, so "the upgrade didn't change anything" is a diff, not a vibe.</p>
+<!-- notification popup -->
+<div id="intro">
+  <div class="win on">
+    <div class="bar"><span>⟨ SYSTEM ⟩</span><span class="dot">NOTIFICATION</span></div>
+    <div class="body">
+      <p class="sysline">[System] The rules of <em>software engineering</em> have changed.</p>
+      <p class="sysline">[System] Most of the industry is still running the old build.</p>
+      <p class="sysline">[System] This page is what adapting early looks like.</p>
+      <span class="cont">▼ CONTINUE</span>
     </div>
   </div>
-</section>
+</div>
 
-<section id="how">
-  <div class="wrap">
-    <h2>How I work</h2>
-    <p>A few rules from my workflow package, verbatim. I think they say more than a skills list would.</p>
-    <ul class="rules">
-      <li>
-        <span class="rule">A gate that has only ever passed is a guess.</span>
-        <span class="why">Perturb what it should catch, confirm it fails with a readable diff and a non-zero exit, restore, confirm green.</span>
-      </li>
-      <li>
-        <span class="rule">A worker reporting "done" starts verification. It never ends the work.</span>
-        <span class="why">Verify diffs, runtime behavior, branches, and commits yourself. Never trust a summary.</span>
-      </li>
-      <li>
-        <span class="rule">A baseline that is not byte-identical across two runs of unchanged code is not a baseline.</span>
-        <span class="why">Flaky references make every comparison a coin flip.</span>
-      </li>
-      <li>
-        <span class="rule">Never present a skipped check as green.</span>
-        <span class="why">Every gate reports pass, fail, blocked, or not run, with the reason.</span>
-      </li>
-      <li>
-        <span class="rule">Smallest maintainable change that fully satisfies the request.</span>
-        <span class="why">A technically valid larger solution loses to an equally correct smaller one.</span>
-      </li>
-    </ul>
-    <blockquote>
-      <span class="q">"Anything only I can judge is either real judgment or a missing gate. Mechanize the second kind."</span>
-    </blockquote>
-  </div>
-</section>
+<div class="app">
 
-<footer id="contact">
-  <div class="wrap">
-    <h2>Contact</h2>
-    <p class="muted">Want the long version of any of these, or the parts I can't put on a public page? Ask.</p>
-    <div class="links">
-      <a href="mailto:nikhil.kapadia.97@gmail.com">email</a>
-      <a href="https://github.com/NikAtNight">github</a>
+  <!-- game menu sidebar -->
+  <nav class="side">
+    <div class="win">
+      <div class="bar"><span>⟨ MENU ⟩</span><span class="dot" style="color: var(--gold);" title="NikAtNight">[NaN]</span></div>
+      <ul class="menu-list">
+        <li><a href="#status" class="active">Status</a></li>
+        <li><a href="#premise">The Premise</a></li>
+        <li><a href="#argus">Argus</a></li>
+        <li><a href="#raid-log">Raid Log</a></li>
+        <li><a href="#career">Career Log</a></li>
+        <li><a href="#side-quests">Side Quests</a></li>
+        <li><a href="#guild">Guild</a></li>
+      </ul>
     </div>
-  </div>
+    <div class="win mini">
+      <div class="body">
+        <div class="row"><span class="k">REGION</span><span class="v">Toronto · EST</span></div>
+        <div class="row"><span class="k">PLAYTIME</span><span class="v" id="playtime">8y</span></div>
+        <div class="row"><span class="k">LOCAL</span><span class="v" id="clock">--:--</span></div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="main">
+
+    <!-- STATUS -->
+    <section class="section active" id="status">
+      <div class="win">
+        <div class="bar"><span>⟨ STATUS ⟩</span><span class="dot">PLAYER INFO</span></div>
+            <div class="body">
+              <div class="status-name"><span class="clan" title="NikAtNight">[NaN]</span> Nikhil Kapadia</div>
+              <div class="bar-block">
+                <div class="bar-label"><span>Exp: agent sessions orchestrated</span><span class="val">2,610 / ∞</span></div>
+                <div class="meter"><div class="fill" data-w="86%"></div><div class="shine"></div></div>
+              </div>
+              <div class="status-div"></div>
+              <table class="status">
+                <tr><td class="k">Level</td><td id="level">29</td></tr>
+                <tr><td class="k">Class</td><td>Senior Software Engineer <span class="dim">(base)</span> · <span class="gold">Agent Orchestrator</span> <span class="dim">(class change, 2026)</span></td></tr>
+                <tr><td class="k">Guild</td><td>Talix</td></tr>
+                <tr><td class="k">Specialty</td><td>Full-stack product engineering · agents that prove their work</td></tr>
+                <tr><td class="k">Passive</td><td><em>Doubt (Lv. MAX)</em>: a claim of "done" starts verification. It never ends the work.</td></tr>
+              </table>
+            </div>
+      </div>
+
+      <div class="win">
+        <div class="bar"><span>⟨ COMMIT LOG ⟩</span><span class="dot">GITHUB · <span class="gold">2,639</span> CONTRIBUTIONS · LAST 12 MONTHS</span></div>
+        <div class="body">
+          <img src="ghchart.svg" onerror="this.onerror=null; this.src='https://ghchart.rshah.org/d9b45b/NikAtNight';" alt="GitHub contribution graph for NikAtNight" style="width: 100%; display: block;">
+        </div>
+      </div>
+
+      <div class="win">
+        <div class="bar"><span>⟨ LOADOUT ⟩</span><span class="dot">EQUIPPED</span></div>
+        <div class="body">
+          <div class="inv">
+            <div class="item g3"><span class="yr">SIG</span><span class="nm">Agent fleet</span><span class="sb">Claude orchestrates · Codex implements · Hermes dispatches</span></div>
+            <div class="item g3"><span class="yr">SIG</span><span class="nm">Git worktrees</span><span class="sb">one per instance · one per agent</span></div>
+            <div class="item g2"><span class="yr">6 yr</span><span class="nm">TypeScript</span><span class="sb">React · Next.js · antd · Storybook</span></div>
+            <div class="item g2"><span class="yr">6 yr</span><span class="nm">SQL</span><span class="sb">MySQL · PostgreSQL · TypeORM</span></div>
+            <div class="item g2"><span class="yr">5 yr</span><span class="nm">Backends</span><span class="sb">NestJS · Django · PHP · REST</span></div>
+            <div class="item g2"><span class="yr">5 yr</span><span class="nm">Docker</span><span class="sb">multi-instance envs on one laptop</span></div>
+            <div class="item"><span class="yr">1 yr</span><span class="nm">Tauri · Rust</span><span class="sb">signed, notarized desktop apps</span></div>
+            <div class="item empty"><span class="nm">———</span><span class="sb">open slot</span></div>
+          </div>
+          <div class="inv-note">GOLD = SIGNATURE GEAR · GRADE SCALES WITH YEARS OF USE</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PREMISE -->
+    <section class="section" id="premise">
+      <div class="win">
+        <div class="bar"><span>⟨ THE PREMISE ⟩</span><span class="dot">01</span></div>
+        <div class="body">
+          <p>The economics of software engineering changed in the span of about two years. Agents now write competent code, and most of the industry is still arguing about what that means for the profession. I skipped the argument. Agents take the repetitive work, and that's fine by me.</p>
+          <p>I moved to the layer the new economics actually reward: <em>orchestration, verification, and the systems that make agent output trustworthy.</em> In practice, I run a fleet of coding agents. Work arrives as tasks on a board, each routed to the cheapest model tier that can handle the judgment it requires, and no result is accepted on the agent's word. Every claim of "done" is verified by something that didn't do the work.</p>
+          <p>The models are commodities. The system around them is the durable advantage, and building that system is what this page documents.</p>
+          <p class="dim" style="font-size: 13.5px;">The system has a name. <a href="#argus" class="goto">Open ⟨ ARGUS ⟩</a></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ARGUS -->
+    <section class="section" id="argus">
+      <div class="win">
+        <div class="bar"><span>⟨ ARGUS ⟩</span><span class="dot">02 · PRIVATE REPO</span></div>
+        <div class="body">
+          <p>Argus is the repo that runs my fleet, named for the watchman with a hundred eyes. It holds the rules every agent on my machine loads before it touches anything: how work gets scoped, what requires my name on it, and how a claim becomes a fact. The repo stays private because it's the machinery. The shape of it isn't a secret:</p>
+          <ul class="files">
+            <li><span class="fn">workflow.md</span><span class="fd">how work moves: cards, waves, checkpoints, handoffs</span></li>
+            <li><span class="fn">guardrails.md</span><span class="fd">what agents may never do without me naming the action</span></li>
+            <li><span class="fn">gates-and-oracles.md</span><span class="fd">how a check earns trust: prove it can fail before believing it passes</span></li>
+            <li><span class="fn">delegation-briefs.md</span><span class="fd">how to brief a worker so "done" means done</span></li>
+            <li><span class="fn">repos/*.md</span><span class="fd">per-codebase knowledge, kept out of the core so the rules don't rot</span></li>
+            <li><span class="fn">sync.sh</span><span class="fd">one source of truth, generated into every tool's config on my machine</span></li>
+          </ul>
+          <div class="qsec">Rules, verbatim</div>
+          <div class="rules-mini">
+            <p><b>"A gate that has only ever passed is a guess."</b> Break it on purpose, watch it fail, then trust it.</p>
+            <p><b>"A worker reporting done starts verification. It never ends the work."</b></p>
+            <p><b>"Never present a skipped check as green."</b> Every check reports pass, fail, blocked, or not run.</p>
+          </div>
+          <p class="dim" style="font-size: 13px; margin-top: 14px;">Currently at v3.9. The version only moves when a rule survives contact with a real failure.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- RAID LOG -->
+    <section class="section" id="raid-log">
+      <div class="win">
+        <div class="bar"><span>⟨ RAID LOG ⟩</span><span class="dot">03</span></div>
+        <div class="body">
+          <div class="entry">
+            <span class="tag">[INCIDENT]</span>
+            <h3>The runaway fleet</h3>
+            <p>One ordinary review prompt spawned 5 agents, which recursively spawned 928 more. A single session, 367 MB of transcripts. The lesson wasn't "be more careful." It was that prose constrains nothing. Delegation caps now live in config, where an agent can't talk its way past them.</p>
+            <p class="result">What it left behind: <b>a rule I still use.</b> If a safeguard only exists as a sentence, it doesn't exist.</p>
+          </div>
+          <div class="entry">
+            <span class="tag">[AUDIT]</span>
+            <h3>Reviewing the last run</h3>
+            <p>I mined every agent transcript on my machine, 2,610 sessions across four tools, to check whether my agents actually follow my rules or I just believe they do. My first attempt rested on broken methodology, so I threw it out and redid it properly.</p>
+            <p class="result">Findings: <b>zero unauthorized commits or pushes</b> across 460 commits and 281 pushes · <b>26 sessions</b> caught claiming done without running a test · <b>36 of 43</b> installed skills retired once the data showed they'd never been used.</p>
+          </div>
+          <div class="entry">
+            <span class="tag">[INFRASTRUCTURE]</span>
+            <h3>Forking the gateway</h3>
+            <p>The open-source gateway my fleet runs on was missing its enforcement layer, so I forked it and built one: checkpointing with claim fencing (a successor can't take over a task until its predecessor's process actually exits), a fail-closed handshake between dispatcher and workers, and workspace leases granted at dispatch instead of discovered as conflicts at runtime.</p>
+            <p class="result">Verified: differential test sweep, branch vs base. <b>Identical failure sets, zero caused by my diff.</b></p>
+          </div>
+          <div class="entry">
+            <span class="tag">[SHIPPED]</span>
+            <h3>Patchdeck, idea to signed app</h3>
+            <p>It started as "an app like GitHub, but not GitHub": a desktop tool that renders local branch diffs the way a pull request does. I had a working Tauri + React app the first night, then spent two weeks iterating from screenshots: multi-repo workspaces, IDE-grade syntax highlighting, a commits-ahead view, and a kanban board that dispatches my agent fleet from inside the app. Then I shipped it properly: code-signed, notarized, auto-updating.</p>
+            <p class="result">Status: <b>on my dock, running my agents.</b> The repo is under Side Quests.</p>
+          </div>
+          <div class="entry">
+            <span class="tag">[PLATFORM]</span>
+            <h3>Four production-like instances, one laptop</h3>
+            <p>I built a CLI where one command brings up parallel, isolated instances of a full production-style stack on a single machine: per-instance frontend, backend and MySQL, shared Postgres services, local HTTPS hostnames, OIDC auth, database cloning and seeding, and a git worktree per instance. Then I hardened it until any teammate could run it without my machine's quirks.</p>
+            <p class="result">Best bug: <b>cloned databases sharing IDs caused cross-instance data bleed.</b> Isolation is a claim. I verified it.</p>
+          </div>
+          <div class="entry">
+            <span class="tag">[TECHNIQUE]</span>
+            <h3>Pixel parity as an agent loop</h3>
+            <p>After a major framework upgrade, the app had to match the reference environment exactly. I turned visual QA into an agent loop: annotated screenshots drive the agent, Storybook parity stories pin components, and the diff between branch and staging becomes the work queue. Down to font weights and hover colors.</p>
+            <p class="result">The reference is evidence. <b>The loop ends when the diff does.</b></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CAREER -->
+    <section class="section" id="career">
+      <div class="win">
+        <div class="bar"><span>⟨ CAREER LOG ⟩</span><span class="dot">04</span></div>
+        <div class="body">
+          <ul class="career">
+            <li>
+              <span class="crow"><span class="role">Senior Software Engineer · <b>BombBomb</b></span><span class="when">Dec 2024 to present</span></span>
+              <span class="cdesc">Custom component library on shadcn/ui, an Auth0 onboarding flow with feature-flagged A/B trials, AI-generated video titles, summaries and campaigns, and an async polling handler that delivers AI results reliably at scale.</span>
+            </li>
+            <li>
+              <span class="crow"><span class="role">Senior Full-Stack, then Frontend Engineer · <b>Olive</b></span><span class="when">Jun 2022 to Oct 2024</span></span>
+              <span class="cdesc">Claude integrated via LangChain, a RAG pipeline on AWS OpenSearch with vector embeddings, Django REST APIs with automated Selenium testing, and the feature-flag management UI used by both dev and product.</span>
+            </li>
+            <li>
+              <span class="crow"><span class="role">Frontend Engineer · <b>Optima Holdings</b></span><span class="when">Jan 2022 to Oct 2023</span></span>
+              <span class="cdesc">Next.js and tRPC performance work that cut API calls by 60%, Stripe payments handling 10k+ monthly transactions, and a Chrome extension streaming live ML trading signals over WebSockets.</span>
+            </li>
+            <li>
+              <span class="crow"><span class="role">Earlier runs</span><span class="when">2018 to 2022</span></span>
+              <span class="cdesc">JAPR Tech (React, then technical analyst), Emailgistics, RBC. Sheridan College, Computer Systems Technology.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- SIDE QUESTS -->
+    <section class="section" id="side-quests">
+      <div class="win">
+        <div class="bar"><span>⟨ SIDE QUESTS ⟩</span><span class="dot">05 · OPEN SOURCE</span></div>
+        <div class="body">
+          <ul class="quests">
+            <li><a class="qname" href="https://patchdeck-site.pages.dev">patchdeck</a><a class="qsrc" href="https://github.com/NikAtNight/patchdeck">[ source ]</a><span class="qdesc">A local-first desktop workbench for reviewing Git branches and coordinating AI agent tasks. The raid interface.</span></li>
+            <li><a class="qname" href="https://github.com/NikAtNight/pulsedeck">pulsedeck</a><span class="qdesc">macOS menu bar monitor for dev machines: CPU, memory, ports, and which coding agents are running right now. The minimap.</span></li>
+            <li><a class="qname" href="https://localflow-site.pages.dev">localflow</a><a class="qsrc" href="https://github.com/NikAtNight/localflow">[ source ]</a><span class="qdesc">Fully local push-to-talk dictation for Apple Silicon. On-device Whisper, types into whatever has focus. Voice commands, literally.</span></li>
+            <li><a class="qname" href="https://github.com/NikAtNight/photovault">photovault</a><span class="qdesc">Password-locked, encrypted local photo and video library. Tauri + Rust. The inventory nobody else can open.</span></li>
+            <li><a class="qname" href="https://github.com/NikAtNight/pi-extensions">pi-extensions</a><span class="qdesc">Extensions for the pi coding agent: review swarms, browser probe, scope guard. Early skill tree for the fleet.</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- GUILD -->
+    <section class="section" id="guild">
+      <div class="win">
+        <div class="bar"><span>⟨ GUILD ⟩</span><span class="dot">06 · TALIX</span></div>
+        <div class="body">
+          <p><em>Talix</em> is the guild. Its main product is <a href="https://talix.app" style="color: var(--gold);">talix.app</a>, invoicing that gets out of your way. I run it with zero marketing spend.</p>
+          <p class="dim" style="font-size: 13px;">This paragraph is the marketing.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<footer class="foot">
+  <span class="dim">[System] Party invite:</span>
+  <a href="mailto:nikhil.kapadia.97@gmail.com">accept via email</a>
+  <span class="dim">·</span>
+  <a href="https://github.com/NikAtNight">github</a>
+  <span class="dim">·</span>
+  <a href="https://www.linkedin.com/in/nikhilkapadia-/">linkedin</a>
+  <span class="dim">·</span>
+  <a href="Nikhil_Kapadia_Resume.pdf" download>resume</a>
 </footer>
 
+<script>
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // level = age, auto-increments on birthday. TODO(Nikhil): set the real month/day.
+  const BIRTHDATE = new Date(1997, 0, 1);
+  const now = new Date();
+  let age = now.getFullYear() - BIRTHDATE.getFullYear();
+  if (now.getMonth() < BIRTHDATE.getMonth() ||
+      (now.getMonth() === BIRTHDATE.getMonth() && now.getDate() < BIRTHDATE.getDate())) age--;
+  document.getElementById('level').textContent = age;
+
+  // playtime = time since first engineering role (May 2018)
+  const START = new Date(2018, 4, 1);
+  let months = (now.getFullYear() - START.getFullYear()) * 12 + (now.getMonth() - START.getMonth());
+  document.getElementById('playtime').textContent = Math.floor(months / 12) + 'y ' + (months % 12) + 'm';
+
+  // local clock, live
+  const clock = document.getElementById('clock');
+  const tick = () => clock.textContent =
+    new Date().toLocaleTimeString('en-CA', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+  tick(); setInterval(tick, 1000);
+
+  // intro popup: play once per session
+  const intro = document.getElementById('intro');
+  const dismiss = () => { intro.classList.add('hide'); sessionStorage.setItem('introSeen', '1'); };
+  if (sessionStorage.getItem('introSeen') || reduced) {
+    intro.classList.add('hide');
+  } else {
+    intro.addEventListener('click', dismiss);
+    setTimeout(dismiss, 5200);
+  }
+
+  // section switching with replayed window animations
+  const links = document.querySelectorAll('.menu-list a');
+  const sections = document.querySelectorAll('.section');
+  function reveal(section) {
+    section.querySelectorAll('.win').forEach((w, i) => {
+      w.classList.remove('on');
+      void w.offsetWidth; // restart animation
+      setTimeout(() => w.classList.add('on'), reduced ? 0 : i * 130);
+    });
+    section.querySelectorAll('.fill').forEach((f, i) => {
+      f.style.width = '0';
+      setTimeout(() => { f.style.width = f.dataset.w; }, reduced ? 0 : 500 + i * 200);
+    });
+  }
+  function show(id) {
+    const target = document.getElementById(id) || document.getElementById('status');
+    sections.forEach(s => s.classList.remove('active'));
+    links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + target.id));
+    target.classList.add('active');
+    reveal(target);
+  }
+  links.forEach(l => l.addEventListener('click', e => {
+    e.preventDefault();
+    const id = l.getAttribute('href').slice(1);
+    history.replaceState(null, '', '#' + id);
+    show(id);
+  }));
+  // in-content section links (e.g. Premise -> Argus)
+  document.querySelectorAll('a.goto').forEach(l => l.addEventListener('click', e => {
+    e.preventDefault();
+    const id = l.getAttribute('href').slice(1);
+    history.replaceState(null, '', '#' + id);
+    show(id);
+    scrollTo({ top: 0, behavior: 'smooth' });
+  }));
+
+  // sidebar + initial section
+  document.querySelectorAll('.side .win').forEach((w, i) => setTimeout(() => w.classList.add('on'), 150 + i * 130));
+  show(location.hash ? location.hash.slice(1) : 'status');
+</script>
 </body>
 </html>
