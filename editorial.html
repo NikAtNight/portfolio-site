@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nikhil Kapadia</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #f7f4ee;
+    color: #1c1a17;
+    font: 19px/1.6 "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  }
+  .page { max-width: 640px; margin: 0 auto; padding: 70px 24px 90px; }
+
+  .masthead {
+    display: flex; justify-content: space-between; align-items: baseline;
+    border-bottom: 2px solid #1c1a17;
+    padding-bottom: 10px;
+  }
+  .masthead .name { font-size: 15px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; }
+  .masthead .role { font-size: 14px; font-style: italic; color: #6b645a; }
+
+  h1 {
+    font-size: 46px; line-height: 1.12; font-weight: 400;
+    letter-spacing: -.01em;
+    margin: 60px 0 34px;
+  }
+  h1 em { font-style: italic; }
+
+  h2 {
+    font-size: 14px; letter-spacing: .14em; text-transform: uppercase;
+    font-weight: 600; color: #96412a;
+    margin: 62px 0 18px;
+    padding-top: 26px;
+    border-top: 1px solid #d8d2c6;
+  }
+  p { margin-bottom: 18px; }
+  .intro p:first-of-type::first-letter {
+    font-size: 58px; float: left; line-height: .85;
+    padding: 4px 10px 0 0; font-weight: 600;
+  }
+  a { color: #96412a; }
+
+  .aside {
+    font-size: 16px; font-style: italic; color: #6b645a;
+    border-left: 2px solid #d8d2c6; padding-left: 18px;
+    margin: 26px 0;
+  }
+
+  .work { margin: 6px 0 4px; }
+  .work dt { font-weight: 700; margin-top: 22px; }
+  .work dd { margin-left: 0; color: #3a362f; }
+
+  .footer {
+    margin-top: 70px; padding-top: 16px;
+    border-top: 2px solid #1c1a17;
+    font-size: 15px; display: flex; justify-content: space-between;
+  }
+  .footer a { text-decoration: none; }
+  .footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 520px) { h1 { font-size: 34px; } }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="masthead">
+    <span class="name">Nikhil Kapadia</span>
+    <span class="role">software engineer</span>
+  </div>
+
+  <h1>Trust is a build artifact.<br><em>I make agents produce it.</em></h1>
+
+  <div class="intro">
+    <p>Most of my recent work is getting AI coding agents to behave like professionals. Not smarter, that part is handled. I mean the boring virtues: prove what you did, stop when you're supposed to, leave evidence instead of a confident summary.</p>
+    <p>My setup is a small fleet. One model orchestrates, others implement and review, and each task goes to the cheapest tier that can handle the judgment involved. The models are commodities. The system around them is the work, and I've been building it in public view of exactly one user: me, at scale, every day.</p>
+  </div>
+
+  <h2>The incident that started it</h2>
+  <p>One ordinary review prompt once spawned five subagents, which recursively spawned 928 more. Three hundred sixty seven megabytes of transcripts from a single session. I could have written "be more careful" in an instructions file. Instead I concluded that prose doesn't constrain anything, and moved the caps on delegation depth and concurrency into harness config, where an agent can't talk its way past them.</p>
+  <p class="aside">That's the pattern in everything I build: when a rule fails, the fix is a mechanism, not a stronger sentence.</p>
+
+  <h2>The audit</h2>
+  <p>Do my agents actually follow the rules I wrote, or do I just believe they do? I mined every transcript on my machine, across four different tools, to find out. The first pass produced numbers I nearly trusted. An independent review found the methodology broken (replay copies inflating counts, prompts logged twice, most sessions machine-dispatched rather than mine), so I threw it out and did it properly.</p>
+  <p>The real findings: 460 commits and 281 pushes with zero unauthorized. Twenty six sessions that wrote files, claimed success, and never ran a test. Seven of my 43 installed agent skills had ever been used, so I deleted the other 36. And an honest caveat I kept in the report: the rules were written mid-period, so the earlier data can't prove they work.</p>
+
+  <h2>Things I've built</h2>
+  <dl class="work">
+    <dt>An enforcement layer for an agent gateway</dt>
+    <dd>Forked an open-source agent gateway and added what it was missing: checkpointing with claim fencing, a fail-closed capability handshake, workspace leases at dispatch time. Discovered my clone was 508 commits behind upstream, rebased first, and proved the branch clean with a differential sweep: identical failure sets on both sides, zero caused by my diff.</dd>
+    <dt>pi-ui</dt>
+    <dd>A terminal session browser that scans the transcript stores of three agent CLIs and resumes any session live over a PTY. TypeScript, no build step, because a personal tool that needs a bundler is a personal tool you stop maintaining.</dd>
+    <dt>A two-phase review pipeline</dt>
+    <dd>Parallel read-only reviewer lanes emit candidates, then a fresh verifier per candidate rules confirmed, plausible, or refuted. The model that wrote the code never gets to be its only reviewer.</dd>
+  </dl>
+
+  <h2>One rule, verbatim</h2>
+  <p class="aside">"A gate that has only ever passed is a guess. Perturb what it should catch, confirm it fails with a readable diff and a non-zero exit, restore, confirm green."</p>
+  <p>If you nodded at that, we'll get along.</p>
+
+  <div class="footer">
+    <a href="mailto:nikhil.kapadia.97@gmail.com">nikhil.kapadia.97@gmail.com</a>
+    <a href="https://github.com/NikAtNight">github.com/NikAtNight</a>
+  </div>
+
+</div>
+</body>
+</html>

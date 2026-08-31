@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nikhil Kapadia</title>
+<meta name="description" content="Nikhil Kapadia, senior software engineer. I run fleets of AI coding agents and build the verification systems that make their output trustworthy.">
+<meta property="og:title" content="Nikhil Kapadia · Fleet Commander">
+<meta property="og:description" content="Senior software engineer. I run fleets of AI coding agents and build the enforcement layer that makes their output trustworthy.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://nikhilkapadia.com">
+<meta name="theme-color" content="#0a0e1a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='28' y='28' width='44' height='44' fill='none' stroke='%234da3ff' stroke-width='9' transform='rotate(45 50 50)'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #070b14;
+    --panel: rgba(13, 22, 41, .82);
+    --line: #1e3a66;
+    --line-bright: #3d6fb8;
+    --glow: rgba(77, 163, 255, .14);
+    --text: #c9d6e8;
+    --dim: #6d829e;
+    --sys: #4da3ff;
+    --gold: #d9b45b;
+    --mono: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    background-image: radial-gradient(ellipse 70% 40% at 50% -5%, rgba(61,111,184,.12), transparent);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 14.5px;
+    line-height: 1.75;
+  }
+  .page { max-width: 720px; margin: 0 auto; padding: 56px 22px 90px; }
+
+  .win {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    box-shadow: 0 0 24px var(--glow), inset 0 0 24px rgba(77,163,255,.03);
+    margin-bottom: 34px;
+    opacity: 0;
+    transform: scaleX(0) scaleY(.04);
+    transform-origin: center;
+  }
+  /* system-window open: a line shoots out, then unfolds into the panel */
+  .win.on { animation: lineToBox .6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  @keyframes lineToBox {
+    0%   { opacity: 0; transform: scaleX(0) scaleY(.04); }
+    12%  { opacity: 1; }
+    45%  { transform: scaleX(1) scaleY(.04); }
+    100% { opacity: 1; transform: scaleX(1) scaleY(1); }
+  }
+  .sysline { opacity: 0; }
+  .win.on .sysline { animation: materialize .7s ease-out forwards; }
+  .win.on .sysline:nth-of-type(1) { animation-delay: .45s; }
+  .win.on .sysline:nth-of-type(2) { animation-delay: .95s; }
+  .win.on .sysline:nth-of-type(3) { animation-delay: 1.45s; }
+  @keyframes materialize {
+    0%   { opacity: 0; letter-spacing: 2px; filter: blur(3px); transform: translateY(4px); }
+    70%  { opacity: .85; filter: blur(.5px); }
+    100% { opacity: 1; letter-spacing: normal; filter: blur(0); transform: translateY(0); }
+  }
+  .win .bar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--line);
+    color: var(--sys);
+    font-size: 12.5px; letter-spacing: .14em;
+  }
+  .win .bar .dot { color: var(--line-bright); }
+  .win .body { padding: 20px 22px; }
+  .win p { margin-bottom: 15px; }
+  .win p:last-child { margin-bottom: 0; }
+
+  .sysline { color: var(--sys); }
+  .dim { color: var(--dim); }
+  .gold { color: var(--gold); }
+  em { color: #e8eef7; font-style: normal; }
+  a { color: var(--sys); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  table.status { width: 100%; border-collapse: collapse; }
+  table.status td { padding: 5px 0; vertical-align: top; }
+  table.status td.k { color: var(--dim); width: 15ch; }
+
+  .status-name {
+    text-align: center;
+    font-size: clamp(26px, 6vw, 38px);
+    font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase;
+    color: #e8f4ff;
+    text-shadow: 0 0 16px rgba(77, 163, 255, .6);
+    margin: 6px 0 18px;
+  }
+  .bar-block { margin: 12px 0; }
+  .bar-label {
+    display: flex; justify-content: space-between;
+    font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--dim); margin-bottom: 5px;
+  }
+  .bar-label .val { color: var(--sys); }
+  .meter {
+    position: relative; height: 12px;
+    background: rgba(80, 80, 80, .35);
+    border: 1px solid var(--line-bright);
+    overflow: hidden;
+  }
+  .meter .fill {
+    height: 100%; width: 0;
+    background: linear-gradient(90deg, #2b5c9e, var(--sys));
+    box-shadow: inset 0 0 4px rgba(255, 255, 255, .5);
+    transition: width .9s ease-out;
+  }
+  .meter .fill.gold { background: linear-gradient(90deg, #8a6d2a, var(--gold)); }
+  .meter .shine {
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
+    background-size: 50% 100%; background-repeat: no-repeat;
+    animation: shine 2s linear infinite;
+    pointer-events: none;
+  }
+  @keyframes shine {
+    0% { background-position: -100% 0; }
+    100% { background-position: 220% 0; }
+  }
+  .status-div { border-top: 1px dashed var(--line); margin: 18px 0 12px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .win, .sysline { opacity: 1 !important; transform: scale(1) !important; animation: none !important; }
+    .meter .shine { animation: none; }
+    .meter .fill { transition: none; }
+  }
+
+  .entry { padding: 16px 0; border-top: 1px dashed var(--line); }
+  .entry:first-of-type { border-top: none; padding-top: 0; }
+  .entry .tag { color: var(--gold); font-size: 12.5px; letter-spacing: .1em; }
+  .entry h3 { font-size: 15px; color: #e8eef7; margin: 4px 0 8px; font-weight: 600; }
+  .entry p { margin-bottom: 8px; }
+  .entry .result { color: var(--dim); font-size: 13.5px; }
+  .entry .result b { color: var(--sys); font-weight: 600; }
+
+  ul.quests { list-style: none; }
+  ul.quests li { padding: 12px 0; border-top: 1px dashed var(--line); }
+  ul.quests li:first-child { border-top: none; padding-top: 0; }
+  ul.quests .qname { color: #e8eef7; font-weight: 600; }
+  ul.quests .qdesc { display: block; color: var(--text); font-size: 13.5px; margin-top: 2px; }
+
+  ul.career { list-style: none; }
+  ul.career li { padding: 14px 0; border-top: 1px dashed var(--line); }
+  ul.career li:first-child { border-top: none; padding-top: 0; }
+  .crow { display: flex; justify-content: space-between; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .crow .role { color: #e8eef7; font-weight: 600; font-size: 15px; }
+  .crow .role b { color: var(--sys); font-weight: 600; }
+  .crow .when { font-size: 12px; color: var(--dim); white-space: nowrap; }
+  .cdesc { display: block; color: var(--text); font-size: 13.5px; margin-top: 3px; }
+
+  .invite { text-align: center; }
+  .invite .links { display: flex; justify-content: center; gap: 28px; margin-top: 10px; flex-wrap: wrap; }
+
+  @media (max-width: 540px) { body { font-size: 13.5px; } .win .body { padding: 16px; } }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="win">
+    <div class="bar"><span>⟨ SYSTEM ⟩</span><span class="dot">NOTIFICATION</span></div>
+    <div class="body">
+      <p class="sysline">[System] The rules of <em>software engineering</em> have changed.</p>
+      <p class="sysline">[System] Most of the industry is still running the old build.</p>
+      <p class="sysline">[System] This page is what adapting early looks like.</p>
+    </div>
+  </div>
+
+  <div class="win">
+    <div class="bar"><span>⟨ STATUS ⟩</span><span class="dot">01 · PLAYER INFO</span></div>
+    <div class="body">
+      <div class="status-name">Nikhil Kapadia</div>
+      <div class="bar-block">
+        <div class="bar-label"><span>Exp: agent sessions orchestrated</span><span class="val">2,610 / ∞</span></div>
+        <div class="meter"><div class="fill" data-w="86%"></div><div class="shine"></div></div>
+      </div>
+      <div class="bar-block">
+        <div class="bar-label"><span>Audit: agent commits + pushes cleared</span><span class="val">741 / 741</span></div>
+        <div class="meter"><div class="fill gold" data-w="100%"></div><div class="shine"></div></div>
+      </div>
+      <div class="status-div"></div>
+      <table class="status">
+        <tr><td class="k">Level</td><td id="level">29</td></tr>
+        <tr><td class="k">Class</td><td>Senior Software Engineer <span class="dim">(base)</span> · <span class="gold">Agent Orchestrator</span> <span class="dim">(class change, 2026)</span></td></tr>
+        <tr><td class="k">Guild</td><td>Talix</td></tr>
+        <tr><td class="k">Region</td><td>Toronto, Canada <span class="dim">· EST</span></td></tr>
+        <tr><td class="k">Specialty</td><td>Enforcement layers for AI agent fleets</td></tr>
+        <tr><td class="k">Passive</td><td><em>Doubt (Lv. MAX)</em>: a claim of "done" starts verification. It never ends the work.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="win">
+    <div class="bar"><span>⟨ THE PREMISE ⟩</span><span class="dot">02</span></div>
+    <div class="body">
+      <p>The economics of software engineering changed in the span of about two years. Agents now write competent code, and most of the industry is still arguing about what that means for the profession. I skipped the argument. Agents take the repetitive work, and that's fine by me.</p>
+      <p>I moved to the layer the new economics actually reward: <em>orchestration, verification, and the systems that make agent output trustworthy.</em> In practice, I run a fleet of coding agents. Work arrives as tasks on a board, each routed to the cheapest model tier that can handle the judgment it requires, and no result is accepted on the agent's word. Every claim of "done" is verified by something that didn't do the work.</p>
+      <p>The models are commodities. The system around them is the durable advantage, and building that system is what this page documents.</p>
+    </div>
+  </div>
+
+  <div class="win">
+    <div class="bar"><span>⟨ RAID LOG ⟩</span><span class="dot">03</span></div>
+    <div class="body">
+      <div class="entry">
+        <span class="tag">[INCIDENT]</span>
+        <h3>The runaway fleet</h3>
+        <p>One ordinary review prompt spawned 5 agents, which recursively spawned 928 more. A single session, 367 MB of transcripts. The lesson wasn't "be more careful." It was that prose constrains nothing. Delegation caps now live in config, where an agent can't talk its way past them.</p>
+        <p class="result">What it left behind: <b>a rule I still use.</b> If a safeguard only exists as a sentence, it doesn't exist.</p>
+      </div>
+      <div class="entry">
+        <span class="tag">[AUDIT]</span>
+        <h3>Reviewing the last run</h3>
+        <p>I mined every agent transcript on my machine, 2,610 sessions across four tools, to check whether my agents actually follow my rules or I just believe they do. My first attempt rested on broken methodology, so I threw it out and redid it properly.</p>
+        <p class="result">Findings: <b>zero unauthorized commits or pushes</b> across 460 commits and 281 pushes · <b>26 sessions</b> caught claiming done without running a test · <b>36 of 43</b> installed skills retired once the data showed they'd never been used.</p>
+      </div>
+      <div class="entry">
+        <span class="tag">[INFRASTRUCTURE]</span>
+        <h3>Forking the gateway</h3>
+        <p>The open-source gateway my fleet runs on was missing its enforcement layer, so I forked it and built one: checkpointing with claim fencing (a successor can't take over a task until its predecessor's process actually exits), a fail-closed handshake between dispatcher and workers, and workspace leases granted at dispatch instead of discovered as conflicts at runtime.</p>
+        <p class="result">Verified: differential test sweep, branch vs base. <b>Identical failure sets, zero caused by my diff.</b></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="win">
+    <div class="bar"><span>⟨ CAREER LOG ⟩</span><span class="dot">04</span></div>
+    <div class="body">
+      <ul class="career">
+        <li>
+          <span class="crow"><span class="role">Senior Software Engineer · <b>BombBomb</b></span><span class="when">Dec 2024 to present</span></span>
+          <span class="cdesc">Custom component library on shadcn/ui, an Auth0 onboarding flow with feature-flagged A/B trials, AI-generated video titles, summaries and campaigns, and an async polling handler that delivers AI results reliably at scale.</span>
+        </li>
+        <li>
+          <span class="crow"><span class="role">Senior Full-Stack, then Frontend Engineer · <b>Olive</b></span><span class="when">Jun 2022 to Oct 2024</span></span>
+          <span class="cdesc">Claude integrated via LangChain, a RAG pipeline on AWS OpenSearch with vector embeddings, Django REST APIs with automated Selenium testing, and the feature-flag management UI used by both dev and product.</span>
+        </li>
+        <li>
+          <span class="crow"><span class="role">Frontend Engineer · <b>Optima Holdings</b></span><span class="when">Jan 2022 to Oct 2023</span></span>
+          <span class="cdesc">Next.js and tRPC performance work that cut API calls by 60%, Stripe payments handling 10k+ monthly transactions, and a Chrome extension streaming live ML trading signals over WebSockets.</span>
+        </li>
+        <li>
+          <span class="crow"><span class="role">Earlier runs</span><span class="when">2018 to 2022</span></span>
+          <span class="cdesc">JAPR Tech (React, then technical analyst), Emailgistics, RBC. Sheridan College, Computer Systems Technology.</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="win">
+    <div class="bar"><span>⟨ SIDE QUESTS ⟩</span><span class="dot">05 · OPEN SOURCE</span></div>
+    <div class="body">
+      <ul class="quests">
+        <li><a class="qname" href="https://github.com/NikAtNight/patchdeck">patchdeck</a><span class="qdesc">A local-first desktop workbench for reviewing Git branches and coordinating AI agent tasks. The raid interface.</span></li>
+        <li><a class="qname" href="https://github.com/NikAtNight/pulsedeck">pulsedeck</a><span class="qdesc">macOS menu bar monitor for dev machines: CPU, memory, ports, and which coding agents are running right now. The minimap.</span></li>
+        <li><a class="qname" href="https://github.com/NikAtNight/localflow">localflow</a><span class="qdesc">Fully local push-to-talk dictation for Apple Silicon. On-device Whisper, types into whatever has focus. Voice commands, literally.</span></li>
+        <li><a class="qname" href="https://github.com/NikAtNight/photovault">photovault</a><span class="qdesc">Password-locked, encrypted local photo and video library. Tauri + Rust. The inventory nobody else can open.</span></li>
+        <li><a class="qname" href="https://github.com/NikAtNight/pi-extensions">pi-extensions</a><span class="qdesc">Extensions for the pi coding agent: review swarms, browser probe, scope guard. Early skill tree for the fleet.</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="win">
+    <div class="bar"><span>⟨ GUILD ⟩</span><span class="dot">06 · TALIX</span></div>
+    <div class="body">
+      <p>Talix is the guild hall. Its main product is <a href="https://talix.app">talix.app</a>, invoicing that gets out of your way. I run it with zero marketing spend.</p>
+      <p class="dim">This paragraph is the marketing.</p>
+    </div>
+  </div>
+
+  <div class="win">
+    <div class="bar"><span>⟨ SYSTEM ⟩</span><span class="dot">PARTY INVITE</span></div>
+    <div class="body invite">
+      <p class="sysline">[System] Player NIKHIL KAPADIA has sent you a party invite.</p>
+      <div class="links">
+        <a href="mailto:nikhil.kapadia.97@gmail.com">accept via email</a>
+        <a href="https://github.com/NikAtNight">github</a>
+        <a href="https://www.linkedin.com/in/nikhilkapadia-/">linkedin</a>
+        <a href="Nikhil_Kapadia_Resume.pdf" download>resume</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script>
+  // level = age, auto-increments on birthday. TODO(Nikhil): set the real month/day.
+  const BIRTHDATE = new Date(1997, 0, 1);
+  const now = new Date();
+  let age = now.getFullYear() - BIRTHDATE.getFullYear();
+  const beforeBirthday = now.getMonth() < BIRTHDATE.getMonth() ||
+    (now.getMonth() === BIRTHDATE.getMonth() && now.getDate() < BIRTHDATE.getDate());
+  if (beforeBirthday) age--;
+  document.getElementById('level').textContent = age;
+
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const io = new IntersectionObserver(entries => {
+    for (const e of entries) {
+      if (!e.isIntersecting) continue;
+      e.target.classList.add('on');
+      e.target.querySelectorAll('.fill').forEach((f, i) => {
+        setTimeout(() => { f.style.width = f.dataset.w; }, 450 + i * 200);
+      });
+      io.unobserve(e.target);
+    }
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.win').forEach(el => io.observe(el));
+  if (reduced) document.querySelectorAll('.fill').forEach(f => f.style.width = f.dataset.w);
+</script>
+</body>
+</html>

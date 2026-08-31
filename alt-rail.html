@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nikhil Kapadia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Oxanium:wght@500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #101321;
+    --panel: rgba(77, 85, 135, 0.16);
+    --rail-top: rgba(134, 155, 207, 0.55);
+    --rail-bot: rgba(114, 133, 170, 0.35);
+    --accent: #becbe8;
+    --ice: #dce9f5;
+    --text: #d3d8e4;
+    --dim: #848ba0;
+    --warn: #b86a6a;
+    --ui: "Rajdhani", "Avenir Next Condensed", sans-serif;
+    --numval: "Oxanium", monospace;
+    --prose: "Inter", -apple-system, sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    background-image: radial-gradient(ellipse 70% 45% at 50% -8%, rgba(134, 155, 207, .08), transparent);
+    color: var(--text);
+    font-family: var(--prose);
+    font-size: 15.5px;
+    line-height: 1.75;
+  }
+  .page { max-width: 740px; margin: 0 auto; padding: 64px 24px 100px; }
+
+  /* the Overgeared idiom: top rail + bottom rail, no side borders, stacked with offset */
+  .sys {
+    position: relative;
+    background: var(--panel);
+    border-top: 2px solid var(--rail-top);
+    border-bottom: 1px solid var(--rail-bot);
+    padding: 30px 34px;
+    margin-bottom: 40px;
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  .sys.on { animation: rise .5s ease-out forwards; }
+  @keyframes rise { to { opacity: 1; transform: translateY(0); } }
+  .sys:nth-child(even) { margin-left: 22px; }
+  .sys:nth-child(odd)  { margin-right: 22px; }
+  /* the pale flourish sitting on the top rail: mirrored curls, done as pure CSS */
+  .sys::before {
+    content: '';
+    position: absolute; top: -5px; left: 50%;
+    width: 64px; height: 8px;
+    transform: translateX(-50%);
+    background:
+      radial-gradient(circle 4px at 4px 4px, transparent 2.5px, var(--ice) 2.5px 3.5px, transparent 3.5px) 0 0 / 8px 8px no-repeat,
+      radial-gradient(circle 4px at 4px 4px, transparent 2.5px, var(--ice) 2.5px 3.5px, transparent 3.5px) 56px 0 / 8px 8px no-repeat,
+      linear-gradient(var(--ice), var(--ice)) 12px 3.5px / 40px 1px no-repeat;
+    opacity: .5;
+  }
+
+  .chip {
+    font-family: var(--ui);
+    font-weight: 500; font-size: 13px;
+    letter-spacing: .34em; text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+
+  .notif { text-align: center; }
+  .notif p {
+    font-family: var(--ui); font-weight: 500; font-size: 18px;
+    letter-spacing: .18em; text-transform: uppercase;
+    color: var(--text);
+    margin: 8px 0;
+    opacity: 0;
+  }
+  .notif p.on { animation: rise .6s ease-out forwards; }
+  .ent { color: var(--ice); }
+
+  .status-name {
+    text-align: center;
+    font-family: var(--ui);
+    font-weight: 600; font-size: clamp(26px, 6vw, 36px);
+    letter-spacing: .3em; text-transform: uppercase;
+    color: var(--ice);
+    margin: 2px 0 18px;
+  }
+  .lvrow {
+    display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;
+    font-family: var(--ui); font-size: 14px; letter-spacing: .2em; text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .lvrow .k { color: var(--dim); margin-right: 8px; font-weight: 500; }
+  .lvrow .v { color: var(--accent); font-weight: 600; }
+
+  .bar-block { margin: 14px 0; }
+  .bar-label {
+    display: flex; justify-content: space-between;
+    font-family: var(--ui); font-weight: 500; font-size: 13.5px;
+    letter-spacing: .16em; text-transform: uppercase; color: var(--dim);
+    margin-bottom: 5px;
+  }
+  .bar-label .val { font-family: var(--numval); font-variant-numeric: tabular-nums; font-size: 12px; color: var(--accent); }
+  .bar { position: relative; height: 8px; background: rgba(255,255,255,.05); border-top: 1px solid var(--rail-bot); border-bottom: 1px solid var(--rail-bot); overflow: hidden; }
+  .bar .fill { height: 100%; width: 0; background: linear-gradient(90deg, rgba(190,203,232,.4), var(--accent)); transition: width .9s ease-out; }
+  .bar .shine { display: none; }
+
+  .divider { border-top: 1px solid var(--rail-bot); margin: 22px 0; }
+  .passive { font-family: var(--ui); font-weight: 500; font-size: 15px; letter-spacing: .04em; color: var(--dim); text-align: center; }
+  .passive b { color: var(--accent); font-weight: 600; }
+
+  .prose p { margin-bottom: 15px; }
+  .prose p:last-child { margin-bottom: 0; }
+  .prose em { font-style: normal; color: var(--ice); font-weight: 500; }
+  .prose a { color: var(--ice); }
+
+  .qtitle { font-family: var(--ui); font-weight: 600; font-size: 19px; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 16px; }
+  .qtitle .qt-ent { color: var(--ice); }
+  .qsec { font-family: var(--ui); font-weight: 600; font-size: 12px; letter-spacing: .3em; text-transform: uppercase; color: var(--dim); margin: 18px 0 8px; }
+  ul.goals { list-style: none; }
+  ul.goals li {
+    display: flex; justify-content: space-between; gap: 16px;
+    font-family: var(--ui); font-weight: 500; font-size: 16px; letter-spacing: .03em;
+    padding: 6px 0;
+  }
+  ul.goals .cnt { font-family: var(--numval); font-variant-numeric: tabular-nums; font-size: 12.5px; color: var(--accent); white-space: nowrap; }
+  .rewards { font-family: var(--ui); font-weight: 500; font-size: 16px; letter-spacing: .03em; }
+  .warn { margin-top: 20px; font-family: var(--ui); font-weight: 600; font-size: 14px; letter-spacing: .12em; text-transform: uppercase; color: var(--warn); }
+
+  .raid { padding: 18px 0; border-top: 1px solid rgba(114,133,170,.2); }
+  .raid:first-of-type { border-top: none; padding-top: 4px; }
+  .rtag { font-family: var(--ui); font-weight: 600; font-size: 12px; letter-spacing: .3em; text-transform: uppercase; color: var(--dim); display: block; margin-bottom: 6px; }
+  .raid h3 { font-family: var(--ui); font-weight: 600; font-size: 19px; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 8px; color: var(--ice); }
+  .raid p { margin-bottom: 8px; }
+  .drop { font-family: var(--ui); font-weight: 500; font-size: 15px; color: var(--dim); }
+  .drop b { color: var(--accent); font-weight: 600; }
+
+  ul.career { list-style: none; }
+  ul.career li { padding: 14px 0; border-top: 1px solid rgba(114,133,170,.2); }
+  ul.career li:first-child { border-top: none; padding-top: 2px; }
+  .crow { display: flex; justify-content: space-between; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .crow .role { font-family: var(--ui); font-weight: 600; font-size: 17px; letter-spacing: .04em; }
+  .crow .role b { color: var(--ice); font-weight: 600; }
+  .crow .when { font-family: var(--numval); font-variant-numeric: tabular-nums; font-size: 12px; color: var(--dim); white-space: nowrap; }
+  .cdesc { display: block; font-size: 14px; color: var(--dim); margin-top: 3px; }
+
+  ul.loot { list-style: none; }
+  ul.loot li { padding: 13px 0; border-top: 1px solid rgba(114,133,170,.2); }
+  ul.loot li:first-child { border-top: none; padding-top: 2px; }
+  .loot a.item { font-family: var(--ui); font-weight: 600; font-size: 17px; letter-spacing: .06em; color: var(--ice); text-decoration: none; }
+  .loot a.item:hover { text-decoration: underline; }
+  .loot .rar { font-family: var(--numval); font-size: 10px; letter-spacing: .25em; margin-left: 10px; vertical-align: 2px; color: var(--dim); }
+  .loot .ldesc { display: block; font-size: 14px; color: var(--dim); margin-top: 2px; }
+
+  .guild .fine { color: var(--dim); font-size: 14px; }
+  .invite { text-align: center; }
+  .invite .msg { font-family: var(--ui); font-weight: 500; font-size: 17px; letter-spacing: .16em; text-transform: uppercase; margin-bottom: 22px; }
+  .btnrow { display: flex; justify-content: center; gap: 18px; flex-wrap: wrap; }
+  .btn {
+    font-family: var(--ui); font-weight: 600; font-size: 14px;
+    letter-spacing: .24em; text-transform: uppercase;
+    padding: 10px 28px; text-decoration: none;
+    border-top: 2px solid var(--rail-top); border-bottom: 1px solid var(--rail-bot);
+    transition: all .18s ease;
+  }
+  .btn.accept { color: var(--ice); background: rgba(134,155,207,.12); }
+  .btn.accept:hover { background: rgba(134,155,207,.22); }
+  .btn.alt { color: var(--dim); }
+  .btn.alt:hover { color: var(--ice); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sys, .notif p { opacity: 1 !important; transform: none !important; animation: none !important; }
+    .bar .fill { transition: none; }
+  }
+  @media (max-width: 560px) {
+    .sys { padding: 24px 20px; }
+    .sys:nth-child(even), .sys:nth-child(odd) { margin-left: 0; margin-right: 0; }
+    .lvrow { gap: 18px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="sys notif" data-anim>
+    <p data-line>'The rules of <span class="ent">software engineering</span> have changed.'</p>
+    <p data-line>'Most of the industry is still running the old build.'</p>
+    <p data-line>'This page is what adapting early looks like.'</p>
+  </div>
+
+  <div class="sys" data-anim>
+    <div class="chip">Status</div>
+    <div class="status-name">Nikhil Kapadia</div>
+    <div class="lvrow">
+      <span><span class="k">Level</span><span class="v">97</span></span>
+      <span><span class="k">Class</span><span class="v">Fleet Commander</span></span>
+      <span><span class="k">Guild</span><span class="v">Talix</span></span>
+    </div>
+    <div class="bar-block">
+      <div class="bar-label"><span>Exp: sessions logged</span><span class="val">2,610 / ???</span></div>
+      <div class="bar"><div class="fill" data-w="86%"></div><div class="shine"></div></div>
+    </div>
+    <div class="bar-block">
+      <div class="bar-label"><span>Trust: verified, never assumed</span><span class="val">741 / 741</span></div>
+      <div class="bar"><div class="fill" data-w="100%"></div><div class="shine"></div></div>
+    </div>
+    <div class="divider"></div>
+    <div class="passive">Operating principle: <b>a claim of "done" starts verification. It never ends the work.</b></div>
+  </div>
+
+  <div class="sys prose" data-anim>
+    <div class="chip">The Premise</div>
+    <p>The economics of software engineering changed in the span of about two years. Agents now write competent code, and most of the industry is still arguing about what that means for the profession. I skipped the argument. Agents take the repetitive work, and that's fine by me.</p>
+    <p>I moved to the layer the new economics actually reward: <em>orchestration, verification, and the systems that make agent output trustworthy.</em> In practice, I run a fleet of coding agents. Work arrives as tasks on a board, each routed to the cheapest model tier that can handle the judgment it requires, and no result is accepted on the agent's word. Every claim of "done" is verified by something that didn't do the work.</p>
+    <p>The models are commodities. The system around them is the durable advantage, and building that system is what this page documents.</p>
+  </div>
+
+  <div class="sys" data-anim>
+    <div class="chip">Main Quest</div>
+    <div class="qtitle"><span class="qt-ent">Standing Quest</span> · Keep the fleet honest</div>
+    <div class="qsec">Objectives</div>
+    <ul class="goals">
+      <li><span>Audit every commit and push my agents have ever made</span><span class="cnt">[ 741 / 741 ]</span></li>
+      <li><span>Identify sessions that claimed done without running a test</span><span class="cnt">[ 26 / 26 ]</span></li>
+      <li><span>Retire tooling that usage data can't justify</span><span class="cnt">[ 36 / 43 ]</span></li>
+      <li><span>Prove every safeguard can fail before trusting it</span><span class="cnt">[ ongoing ]</span></li>
+    </ul>
+    <div class="qsec">Time Limit</div>
+    <p style="font-family: var(--ui); font-weight: 500;">None. This one doesn't expire.</p>
+    <div class="qsec">Rewards</div>
+    <p class="rewards">An enforcement layer no model ships with &nbsp;·&nbsp; Time back, compounding &nbsp;·&nbsp; Output I can sign my name to</p>
+    <p class="warn">Warning: skipped verification always costs more than running it.</p>
+  </div>
+
+  <div class="sys" data-anim>
+    <div class="chip">Raid Log</div>
+    <div class="raid">
+      <span class="rtag">Incident</span>
+      <h3>The runaway fleet</h3>
+      <p>One ordinary review prompt spawned 5 agents, which recursively spawned 928 more. A single session, 367 MB of transcripts. The lesson wasn't "be more careful." It was that prose constrains nothing. Delegation caps now live in config, where an agent can't talk its way past them.</p>
+      <p class="drop">What it left behind: <b>a rule I still use</b>. If a safeguard only exists as a sentence, it doesn't exist.</p>
+    </div>
+    <div class="raid">
+      <span class="rtag">Audit</span>
+      <h3>Reviewing the last run</h3>
+      <p>I mined every agent transcript on my machine, 2,610 sessions across four tools, to check whether my agents actually follow my rules or I just believe they do. My first attempt rested on broken methodology, so I threw it out and redid it properly.</p>
+      <p class="drop">Findings: <b>zero unauthorized commits or pushes</b> across 460 commits and 281 pushes. 26 sessions caught claiming done without a test. 36 of 43 skills retired once the data showed they'd never been used.</p>
+    </div>
+    <div class="raid">
+      <span class="rtag">Infrastructure</span>
+      <h3>Forking the gateway</h3>
+      <p>The open-source gateway my fleet runs on was missing its enforcement layer, so I forked it and built one: checkpointing with claim fencing (a successor can't take over a task until its predecessor's process actually exits), a fail-closed handshake between dispatcher and workers, and workspace leases granted at dispatch instead of discovered as conflicts at runtime.</p>
+      <p class="drop">Verified: differential test sweep, branch vs base. <b>Identical failure sets, zero caused by my diff.</b></p>
+    </div>
+  </div>
+
+  <div class="sys" data-anim>
+    <div class="chip">Career Log</div>
+    <ul class="career">
+      <li>
+        <span class="crow"><span class="role">Senior Software Engineer · <b>BombBomb</b></span><span class="when">Dec 2024 to present</span></span>
+        <span class="cdesc">Custom component library on shadcn/ui, an Auth0 onboarding flow with feature-flagged A/B trials, AI-generated video titles, summaries and campaigns, and an async polling handler that delivers AI results reliably at scale.</span>
+      </li>
+      <li>
+        <span class="crow"><span class="role">Senior Full-Stack, then Frontend Engineer · <b>Olive</b></span><span class="when">Jun 2022 to Oct 2024</span></span>
+        <span class="cdesc">Claude integrated via LangChain, a RAG pipeline on AWS OpenSearch with vector embeddings, Django REST APIs with automated Selenium testing, and the feature-flag management UI used by both dev and product.</span>
+      </li>
+      <li>
+        <span class="crow"><span class="role">Frontend Engineer · <b>Optima Holdings</b></span><span class="when">Jan 2022 to Oct 2023</span></span>
+        <span class="cdesc">Next.js and tRPC performance work that cut API calls by 60%, Stripe payments handling 10k+ monthly transactions, and a Chrome extension streaming live ML trading signals over WebSockets.</span>
+      </li>
+      <li>
+        <span class="crow"><span class="role">Earlier runs</span><span class="when">2018 to 2022</span></span>
+        <span class="cdesc">JAPR Tech (React, then technical analyst), Emailgistics, RBC. Sheridan College, Computer Systems Technology.</span>
+      </li>
+    </ul>
+  </div>
+
+  <div class="sys" data-anim>
+    <div class="chip">Inventory · Open Source</div>
+    <ul class="loot">
+      <li><a class="item" href="https://github.com/NikAtNight/patchdeck">patchdeck</a><span class="rar">[ EPIC ]</span><span class="ldesc">A local-first desktop workbench for reviewing Git branches and coordinating AI agent tasks. The raid interface.</span></li>
+      <li><a class="item" href="https://github.com/NikAtNight/pulsedeck">pulsedeck</a><span class="rar">[ RARE ]</span><span class="ldesc">macOS menu bar monitor for dev machines: CPU, memory, ports, and which coding agents are running right now. The minimap.</span></li>
+      <li><a class="item" href="https://github.com/NikAtNight/localflow">localflow</a><span class="rar">[ RARE ]</span><span class="ldesc">Fully local push-to-talk dictation for Apple Silicon. On-device Whisper, types into whatever has focus. Voice commands, literally.</span></li>
+      <li><a class="item" href="https://github.com/NikAtNight/photovault">photovault</a><span class="rar">[ UNCOMMON ]</span><span class="ldesc">Password-locked, encrypted local photo and video library. Tauri + Rust. The inventory nobody else can open.</span></li>
+      <li><a class="item" href="https://github.com/NikAtNight/pi-extensions">pi-extensions</a><span class="rar">[ UNCOMMON ]</span><span class="ldesc">Extensions for the pi coding agent: review swarms, browser probe, scope guard. Early skill tree for the fleet.</span></li>
+    </ul>
+  </div>
+
+  <div class="sys guild prose" data-anim>
+    <div class="chip">Guild Hall</div>
+    <p><em>Talix</em> is the guild. Its main product is <a href="https://talix.app">talix.app</a>, invoicing that gets out of your way. I run it with zero marketing spend.</p>
+    <p class="fine">This paragraph is the marketing.</p>
+  </div>
+
+  <div class="sys invite" data-anim>
+    <p class="msg">'Nikhil Kapadia has sent you a party invite.'</p>
+    <div class="btnrow">
+      <a class="btn accept" href="mailto:nikhil.kapadia.97@gmail.com">Accept</a>
+      <a class="btn alt" href="https://github.com/NikAtNight">GitHub</a>
+      <a class="btn alt" href="https://www.linkedin.com/in/nikhilkapadia-/">LinkedIn</a>
+    </div>
+  </div>
+
+</div>
+<script>
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const io = new IntersectionObserver(entries => {
+    for (const e of entries) {
+      if (!e.isIntersecting) continue;
+      const el = e.target;
+      el.classList.add('on');
+      el.querySelectorAll('[data-line]').forEach((l, i) => setTimeout(() => l.classList.add('on'), 200 + i * 450));
+      el.querySelectorAll('.fill').forEach((f, i) => setTimeout(() => { f.style.width = f.dataset.w; }, 300 + i * 180));
+      io.unobserve(el);
+    }
+  }, { threshold: 0.15 });
+  document.querySelectorAll('[data-anim]').forEach(el => io.observe(el));
+  if (reduced) document.querySelectorAll('.fill').forEach(f => f.style.width = f.dataset.w);
+</script>
+</body>
+</html>

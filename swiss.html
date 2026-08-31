@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nikhil Kapadia</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #fff;
+    color: #000;
+    font: 16px/1.5 "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+  .page { max-width: 960px; margin: 0 auto; padding: 40px 28px 100px; }
+
+  .top {
+    display: flex; justify-content: space-between;
+    font-size: 13px; font-weight: 500;
+    padding-bottom: 14px; border-bottom: 3px solid #000;
+  }
+
+  h1 {
+    font-size: clamp(44px, 9vw, 92px);
+    line-height: .98; letter-spacing: -.035em; font-weight: 700;
+    margin: 48px 0 8px;
+    text-wrap: balance;
+  }
+  h1 .red { color: #e0311a; }
+  .sub { font-size: 20px; max-width: 34ch; margin: 20px 0 70px; line-height: 1.4; }
+
+  .row {
+    display: grid;
+    grid-template-columns: 90px 220px 1fr;
+    gap: 24px;
+    padding: 26px 0;
+    border-top: 1px solid #000;
+  }
+  .row .no { font-size: 13px; font-weight: 500; color: #e0311a; }
+  .row h3 { font-size: 20px; letter-spacing: -.01em; line-height: 1.25; }
+  .row p { margin-bottom: 12px; }
+  .row p:last-child { margin-bottom: 0; }
+
+  .facts {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+    background: #000; border: 1px solid #000;
+    margin: 70px 0;
+  }
+  .facts div { background: #fff; padding: 18px 16px 22px; }
+  .facts .n { font-size: 40px; font-weight: 700; letter-spacing: -.03em; display: block; }
+  .facts .l { font-size: 13px; line-height: 1.45; display: block; margin-top: 4px; }
+
+  .bottom {
+    border-top: 3px solid #000; padding-top: 16px;
+    display: flex; justify-content: space-between; font-size: 14px; font-weight: 500;
+  }
+  a { color: #000; text-decoration: none; }
+  a:hover { color: #e0311a; }
+
+  @media (max-width: 700px) {
+    .row { grid-template-columns: 1fr; gap: 8px; }
+    .facts { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="top">
+    <span>Nikhil Kapadia</span>
+    <span>Software engineer</span>
+    <span><a href="mailto:nikhil.kapadia.97@gmail.com">Contact</a></span>
+  </div>
+
+  <h1>Agents lie.<br>My systems <span class="red">check.</span></h1>
+  <p class="sub">I build the enforcement layer around fleets of AI coding agents: leases, frozen tests, adversarial review, and audits of my own rules.</p>
+
+  <div class="row">
+    <span class="no">01</span>
+    <h3>The fleet</h3>
+    <div>
+      <p>One model orchestrates, others implement and review, each task routed by how much judgment it needs. The interesting engineering is the guardrails: write leases handed out at dispatch so agents never fight over a worktree, acceptance tests frozen before the implementer sees them, and a permission model where commit doesn't imply push and push doesn't imply PR.</p>
+      <p>It exists because one review prompt once spawned 928 recursive subagents. The fix wasn't a warning in a doc. It was moving delegation caps into config an agent can't argue with.</p>
+    </div>
+  </div>
+
+  <div class="row">
+    <span class="no">02</span>
+    <h3>Gateway fork</h3>
+    <div>
+      <p>Forked an open-source agent gateway and built its missing enforcement layer: checkpointing with claim fencing, a fail-closed capability handshake, comment-driven wake for blocked work. Rebased a shallow clone that turned out to be 508 commits behind upstream before touching anything.</p>
+      <p>Proved the branch clean with a differential sweep. Branch and base failed identically, roughly 605 pre-existing environmental failures each, zero caused by the diff.</p>
+    </div>
+  </div>
+
+  <div class="row">
+    <span class="no">03</span>
+    <h3>The audit</h3>
+    <div>
+      <p>I mined every agent transcript on my machine to test whether my agents follow my rules or I just believe they do. First pass had broken methodology (replay copies, double-logged prompts), so I threw it out and redid it. Kept the caveat that the rules postdate most of the data, so the data can't flatter them.</p>
+    </div>
+  </div>
+
+  <div class="row">
+    <span class="no">04</span>
+    <h3>Tools</h3>
+    <div>
+      <p>pi-ui, a terminal browser that resumes live sessions from three different agent CLIs over a PTY. A two-phase review pipeline where the model that wrote the code is never its only reviewer. A screen-by-screen parity differ that turns "the upgrade changed nothing" from a vibe into a diff.</p>
+    </div>
+  </div>
+
+  <div class="facts">
+    <div><span class="n">0</span><span class="l">unauthorized commits or pushes across 460 commits and 281 pushes audited</span></div>
+    <div><span class="n">26</span><span class="l">sessions caught claiming done without running a test. The enemy.</span></div>
+    <div><span class="n">36/43</span><span class="l">installed agent skills deleted after usage data showed they were never invoked</span></div>
+  </div>
+
+  <div class="bottom">
+    <a href="mailto:nikhil.kapadia.97@gmail.com">nikhil.kapadia.97@gmail.com</a>
+    <a href="https://github.com/NikAtNight">github.com/NikAtNight</a>
+  </div>
+
+</div>
+</body>
+</html>

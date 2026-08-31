@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>nikhil(1)</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #ffffff;
+    color: #111;
+    font: 15px/1.7 "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  }
+  .page { max-width: 700px; margin: 0 auto; padding: 48px 24px 80px; }
+
+  .mhead { display: flex; justify-content: space-between; margin-bottom: 40px; }
+
+  h2 { font-size: 15px; font-weight: 700; margin: 34px 0 8px; }
+  .ind { padding-left: 4ch; }
+  p { margin-bottom: 14px; }
+  b { font-weight: 700; }
+  i { font-style: italic; }
+  a { color: #111; }
+  a:hover { background: #111; color: #fff; text-decoration: none; }
+
+  .opt { margin-bottom: 14px; }
+  .opt .flag { font-weight: 700; }
+  .opt .desc { padding-left: 4ch; display: block; }
+
+  .kv td { vertical-align: top; padding: 0 3ch 6px 0; }
+
+  @media (max-width: 560px) { .ind { padding-left: 2ch; } .opt .desc { padding-left: 2ch; } }
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="mhead"><span>NIKHIL(1)</span><span>General Commands Manual</span><span>NIKHIL(1)</span></div>
+
+<h2>NAME</h2>
+<div class="ind">
+  <p><b>nikhil</b> - software engineer; runs fleets of coding agents that have to prove their work</p>
+</div>
+
+<h2>SYNOPSIS</h2>
+<div class="ind">
+  <p><b>nikhil</b> [<b>--orchestrate</b> <i>fleet</i>] [<b>--verify</b> <i>everything</i>] [<b>--trust</b> <i>nothing unverified</i>]</p>
+</div>
+
+<h2>DESCRIPTION</h2>
+<div class="ind">
+  <p>Builds the systems around AI coding agents rather than just using them. One model orchestrates, others implement and review, each task routed to the cheapest tier that can handle the judgment required. The models are interchangeable. The enforcement layer is not, so that's where the effort goes: write leases handed out at dispatch, acceptance tests frozen before the implementer sees them, review verdicts limited to CONFIRMED, PLAUSIBLE, or REFUTED, and a permission model where commit does not imply push and push does not imply PR.</p>
+  <p>Operating principle: anything only a human can judge is either real judgment or a missing gate. Most of it is the second kind. Build the gate.</p>
+</div>
+
+<h2>PROJECTS</h2>
+<div class="ind">
+  <div class="opt">
+    <span class="flag">agent gateway fork</span>
+    <span class="desc">Forked an open-source agent gateway and built its missing enforcement layer: checkpointing with claim fencing (a successor can't take a card until its predecessor's PID exits), a fail-closed capability handshake between dispatcher and workers, comment-driven wake for blocked cards. Found the clone was shallow and 508 commits behind upstream; rebased onto real mainline before building. Decided the fork is the product; upstreaming is opportunistic.</span>
+  </div>
+  <div class="opt">
+    <span class="flag">pi-ui</span>
+    <span class="desc">Terminal session browser and multiplexer. Scans the on-disk transcript stores of three different agent CLIs, groups sessions by project, resumes any of them live over a PTY. TypeScript run natively by Node, no build step.</span>
+  </div>
+  <div class="opt">
+    <span class="flag">swarm review pipeline</span>
+    <span class="desc">Parallel read-only reviewer lanes emit candidate findings in a fixed format; one fresh verifier per candidate returns a verdict. The model that wrote the code is never its only reviewer.</span>
+  </div>
+  <div class="opt">
+    <span class="flag">workflow package</span>
+    <span class="desc">The rules the whole fleet runs on, maintained as a versioned repo with a sync script that generates the copies each tool loads. Core rules stay repo-agnostic; per-repo detail lives in per-repo files so the general rules don't rot.</span>
+  </div>
+</div>
+
+<h2>EXIT STATUS</h2>
+<div class="ind">
+  <p>Reports one of: PASS, FAIL, BLOCKED, or NOT RUN, with the reason. Never presents a skipped check as green.</p>
+</div>
+
+<h2>METRICS</h2>
+<div class="ind">
+  <table class="kv">
+    <tr><td>460 / 281</td><td>commits / pushes audited across all agent sessions; zero unauthorized</td></tr>
+    <tr><td>928</td><td>subagents recursively spawned by one runaway session; now impossible, caps live in harness config, not prose</td></tr>
+    <tr><td>26</td><td>sessions caught claiming done without running a test; the failure mode everything above is designed against</td></tr>
+    <tr><td>36 / 43</td><td>installed agent skills deleted after usage data showed they'd never been invoked</td></tr>
+    <tr><td>0</td><td>test failures caused by the gateway fork, proven by differential sweep against ~605 pre-existing failures on both sides</td></tr>
+  </table>
+</div>
+
+<h2>BUGS</h2>
+<div class="ind">
+  <p>The audit's first pass shipped numbers built on broken methodology (replay copies inflated 180 files into ~42 real threads). Caught by independent review, thrown out, redone. The bug tracker for my own process is public in this sense: I'd rather show the correction than pretend the first draft was right.</p>
+</div>
+
+<h2>SEE ALSO</h2>
+<div class="ind">
+  <p><a href="mailto:nikhil.kapadia.97@gmail.com">nikhil.kapadia.97@gmail.com</a>, <a href="https://github.com/NikAtNight">github.com/NikAtNight</a></p>
+</div>
+
+<div class="mhead" style="margin-top:48px"><span>macOS</span><span>August 2026</span><span>NIKHIL(1)</span></div>
+
+</div>
+</body>
+</html>
