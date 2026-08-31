@@ -240,7 +240,8 @@
   ul.files li:first-child { border-top: none; }
   ul.files .fn { color: var(--sys); width: 21ch; flex-shrink: 0; }
   ul.files .fd { color: var(--text); }
-  .rules-mini p { color: var(--dim); font-size: 13.5px; margin-bottom: 7px; }
+  .rules-mini p { color: var(--dim); font-size: 13.5px; line-height: 1.8; margin-bottom: 14px; }
+  .rules-mini p:last-child { margin-bottom: 0; }
   .rules-mini b { color: var(--gold); font-weight: 600; }
 
   /* ============ raid log / entries ============ */
@@ -558,8 +559,8 @@
 <script>
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // level = age, auto-increments on birthday. TODO(Nikhil): set the real month/day.
-  const BIRTHDATE = new Date(1997, 0, 1);
+  // level = age, auto-increments on birthday (Dec 1, 1997)
+  const BIRTHDATE = new Date(1997, 11, 1);
   const now = new Date();
   let age = now.getFullYear() - BIRTHDATE.getFullYear();
   if (now.getMonth() < BIRTHDATE.getMonth() ||
