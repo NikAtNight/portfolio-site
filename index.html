@@ -99,9 +99,8 @@
   .win.on .sysline:nth-of-type(2) { animation-delay: .95s; }
   .win.on .sysline:nth-of-type(3) { animation-delay: 1.5s; }
   @keyframes materialize {
-    0%   { opacity: 0; letter-spacing: 2px; filter: blur(3px); transform: translateY(4px); }
-    70%  { opacity: .85; filter: blur(.5px); }
-    100% { opacity: 1; letter-spacing: normal; filter: blur(0); transform: translateY(0); }
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
   .dim { color: var(--dim); }
   .gold { color: var(--gold); }
@@ -213,15 +212,17 @@
   .item:hover { transform: translateY(-2px); box-shadow: 0 0 16px var(--glow); }
   .item .yr {
     position: absolute; top: 9px; right: 11px;
-    font-size: 10.5px; color: var(--dim); letter-spacing: .08em;
+    font-size: 10.5px; color: var(--sys); letter-spacing: .08em;
   }
   .item .nm { display: block; font-weight: 700; font-size: 14.5px; color: #e8f4ff; margin-bottom: 3px; }
   .item .sb { display: block; font-size: 11.5px; color: var(--dim); line-height: 1.55; }
   .item.g3 { border-color: rgba(217, 180, 91, .5); box-shadow: inset 0 0 16px rgba(217, 180, 91, .06); }
   .item.g3 .nm, .item.g3 .yr { color: var(--gold); }
-  .item.g2 { border-color: var(--line-bright); }
-  .item.g2 .yr { color: var(--gold); }
-  .item.g1 .yr { color: var(--sys); }
+  /* rarity ladder: rare blue, epic purple, legendary orange, mythic gold */
+  .item.g2 { border-color: rgba(255, 148, 64, .45); }
+  .item.g2 .yr { color: #ff9440; }
+  .item.g1 { border-color: rgba(176, 124, 232, .4); }
+  .item.g1 .yr { color: #b07ce8; }
   .item.empty { border-style: dashed; opacity: .4; }
   .inv-note { margin-top: 12px; font-size: 11px; color: var(--dim); letter-spacing: .08em; }
 
@@ -391,19 +392,19 @@
       </div>
 
       <div class="win">
-        <div class="bar"><span>⟨ LOADOUT ⟩</span><span class="dot">EQUIPPED</span></div>
+        <div class="bar"><span>⟨ SKILLS ⟩</span><span class="dot">UNLOCKED</span></div>
         <div class="body">
           <div class="inv">
-            <div class="item g3"><span class="yr">MYTHIC</span><span class="nm">Agent fleet</span><span class="sb">Claude orchestrates · Codex implements · Hermes dispatches</span></div>
-            <div class="item g3"><span class="yr">MYTHIC</span><span class="nm">Git worktrees</span><span class="sb">one per instance · one per agent</span></div>
-            <div class="item g2"><span class="yr">LEGENDARY</span><span class="nm">TypeScript</span><span class="sb">React · Next.js · antd · Storybook · 6 yr</span></div>
-            <div class="item g2"><span class="yr">LEGENDARY</span><span class="nm">SQL</span><span class="sb">MySQL · PostgreSQL · TypeORM · 6 yr</span></div>
-            <div class="item g1"><span class="yr">EPIC</span><span class="nm">Backends</span><span class="sb">NestJS · Django · PHP · REST · 5 yr</span></div>
-            <div class="item g1"><span class="yr">EPIC</span><span class="nm">Docker</span><span class="sb">multi-instance envs on one laptop · 5 yr</span></div>
-            <div class="item"><span class="yr">RARE</span><span class="nm">Tauri · Rust</span><span class="sb">signed, notarized desktop apps · 1 yr</span></div>
-            <div class="item empty"><span class="nm">———</span><span class="sb">open slot</span></div>
+            <div class="item g3"><span class="yr">MYTHIC</span><span class="nm">Agent orchestration</span><span class="sb">Claude · Codex · Hermes · skills that review the way I do</span></div>
+            <div class="item g2"><span class="yr">LEGENDARY</span><span class="nm">Full-stack TypeScript</span><span class="sb">React · Next.js · Node · antd · Storybook · 6 yr</span></div>
+            <div class="item g2"><span class="yr">LEGENDARY</span><span class="nm">Data and APIs</span><span class="sb">MySQL · PostgreSQL · TypeORM · Django REST · 6 yr</span></div>
+            <div class="item g1"><span class="yr">EPIC</span><span class="nm">Parallel environments</span><span class="sb">Docker multi-instance · a git worktree per agent · 5 yr</span></div>
+            <div class="item g1"><span class="yr">EPIC</span><span class="nm">Auth and integrations</span><span class="sb">Keycloak · Auth0 · Stripe · S3 · 5 yr</span></div>
+            <div class="item g1"><span class="yr">EPIC</span><span class="nm">Pixel-parity QA</span><span class="sb">screenshot-driven agent loops · Storybook parity · 2 yr</span></div>
+            <div class="item"><span class="yr">RARE</span><span class="nm">AI features</span><span class="sb">LangChain · RAG · OpenSearch · 3 yr</span></div>
+            <div class="item"><span class="yr">RARE</span><span class="nm">Desktop apps</span><span class="sb">Tauri · Rust · signed and notarized · 1 yr</span></div>
           </div>
-          <div class="inv-note">MYTHIC = SIGNATURE GEAR · TIER CLIMBS WITH YEARS OF USE</div>
+          <div class="inv-note">MYTHIC = SIGNATURE · TIER CLIMBS WITH YEARS OF USE</div>
         </div>
       </div>
     </section>
