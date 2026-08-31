@@ -381,7 +381,7 @@
       </div>
 
       <div class="win">
-        <div class="bar"><span>⟨ COMMIT LOG ⟩</span><span class="dot">GITHUB · <span class="gold">2,639</span> CONTRIBUTIONS · LAST 12 MONTHS</span></div>
+        <div class="bar"><span>⟨ COMMIT LOG ⟩</span><span class="dot">GITHUB · <span class="gold" id="gh-count">2,639</span> CONTRIBUTIONS · LAST 12 MONTHS</span></div>
         <div class="body">
           <img src="ghchart.svg" onerror="this.onerror=null; this.src='https://ghchart.rshah.org/d9b45b/NikAtNight';" alt="GitHub contribution graph for NikAtNight" style="width: 100%; display: block;">
         </div>
@@ -571,6 +571,14 @@
   const START = new Date(2018, 4, 1);
   let months = (now.getFullYear() - START.getFullYear()) * 12 + (now.getMonth() - START.getMonth());
   document.getElementById('playtime').textContent = Math.floor(months / 12) + 'y ' + (months % 12) + 'm';
+
+  // live contribution count; the baked-in number is the fallback
+  if (location.protocol.startsWith('http')) {
+    fetch('/api/stats')
+      .then(r => (r.ok ? r.json() : null))
+      .then(d => { if (d && d.ok) document.getElementById('gh-count').textContent = d.contributions; })
+      .catch(() => {});
+  }
 
   // local clock, live
   const clock = document.getElementById('clock');
