@@ -216,8 +216,17 @@
     font-size: 10px; color: var(--sys); letter-spacing: .14em;
     margin-bottom: 9px;
   }
-  .item .nm { display: block; font-weight: 700; font-size: 14.5px; color: #e8f4ff; margin-bottom: 6px; }
-  .item .sb { display: block; font-size: 11.5px; color: var(--dim); line-height: 1.6; }
+  .item .nm { display: block; font-weight: 700; font-size: 14.5px; color: #e8f4ff; margin-bottom: 8px; }
+  .item .sb { display: flex; flex-wrap: wrap; gap: 5px; }
+  .item .sb i {
+    font-style: normal; font-size: 10.5px; line-height: 1.4;
+    color: #aebbd0;
+    padding: 2px 7px;
+    border: 1px solid rgba(30, 58, 102, .9);
+    border-radius: 3px;
+    background: rgba(13, 22, 41, .6);
+  }
+  .item .fl { display: block; margin-top: 8px; font-size: 11px; color: var(--dim); line-height: 1.5; }
   .item .ys {
     position: absolute; right: 14px; bottom: 11px;
     font-size: 10.5px; color: var(--dim); letter-spacing: .08em;
@@ -401,14 +410,14 @@
         <div class="bar"><span>⟨ SKILLS ⟩</span><span class="dot">UNLOCKED</span></div>
         <div class="body">
           <div class="inv">
-            <div class="item g3"><span class="yr">MYTHIC</span><span class="nm">Agent orchestration</span><span class="sb">Claude · Codex · Hermes · skills that review the way I do</span><span class="ys">2 yr</span></div>
-            <div class="item g2"><span class="yr">LEGENDARY</span><span class="nm">Full-stack TypeScript</span><span class="sb">React · Next.js · Node · antd · Storybook</span><span class="ys">6 yr</span></div>
-            <div class="item g2"><span class="yr">LEGENDARY</span><span class="nm">Data and APIs</span><span class="sb">MySQL · PostgreSQL · TypeORM · Django REST</span><span class="ys">6 yr</span></div>
-            <div class="item g1"><span class="yr">EPIC</span><span class="nm">Parallel environments</span><span class="sb">Docker multi-instance · a git worktree per agent</span><span class="ys">5 yr</span></div>
-            <div class="item g1"><span class="yr">EPIC</span><span class="nm">Auth and integrations</span><span class="sb">Keycloak · Auth0 · Stripe · S3</span><span class="ys">5 yr</span></div>
-            <div class="item g1"><span class="yr">EPIC</span><span class="nm">Pixel-parity QA</span><span class="sb">screenshot-driven agent loops · Storybook parity</span><span class="ys">2 yr</span></div>
-            <div class="item"><span class="yr">RARE</span><span class="nm">AI features</span><span class="sb">LangChain · RAG · OpenSearch</span><span class="ys">3 yr</span></div>
-            <div class="item"><span class="yr">RARE</span><span class="nm">Desktop apps</span><span class="sb">Tauri · Rust · signed and notarized</span><span class="ys">1 yr</span></div>
+            <div class="item g3"><span class="yr">MYTHIC</span><span class="nm">Agent orchestration</span><span class="sb"><i>Claude</i><i>Codex</i><i>Hermes</i></span><span class="fl">skills that review the way I do</span><span class="ys">2 yr</span></div>
+            <div class="item g2"><span class="yr">LEGENDARY</span><span class="nm">Full-stack TypeScript</span><span class="sb"><i>React</i><i>Next.js</i><i>Node</i><i>antd</i><i>Storybook</i></span><span class="ys">6 yr</span></div>
+            <div class="item g2"><span class="yr">LEGENDARY</span><span class="nm">Data and APIs</span><span class="sb"><i>MySQL</i><i>PostgreSQL</i><i>TypeORM</i><i>Django REST</i></span><span class="ys">6 yr</span></div>
+            <div class="item g1"><span class="yr">EPIC</span><span class="nm">Parallel environments</span><span class="sb"><i>Docker</i><i>git worktrees</i></span><span class="fl">one isolated env per agent</span><span class="ys">5 yr</span></div>
+            <div class="item g1"><span class="yr">EPIC</span><span class="nm">Auth and integrations</span><span class="sb"><i>Keycloak</i><i>Auth0</i><i>Stripe</i><i>S3</i></span><span class="ys">5 yr</span></div>
+            <div class="item g1"><span class="yr">EPIC</span><span class="nm">Pixel-parity QA</span><span class="sb"><i>Storybook</i><i>screenshot loops</i></span><span class="fl">agents chase staging until the diff is zero</span><span class="ys">2 yr</span></div>
+            <div class="item"><span class="yr">RARE</span><span class="nm">AI features</span><span class="sb"><i>LangChain</i><i>RAG</i><i>OpenSearch</i></span><span class="ys">3 yr</span></div>
+            <div class="item"><span class="yr">RARE</span><span class="nm">Desktop apps</span><span class="sb"><i>Tauri</i><i>Rust</i></span><span class="fl">signed and notarized</span><span class="ys">1 yr</span></div>
           </div>
           <div class="inv-note">MYTHIC = SIGNATURE · TIER CLIMBS WITH YEARS OF USE</div>
         </div>
@@ -594,6 +603,11 @@
   const START = new Date(2018, 4, 1);
   let months = (now.getFullYear() - START.getFullYear()) * 12 + (now.getMonth() - START.getMonth());
   document.getElementById('playtime').textContent = Math.floor(months / 12) + 'y ' + (months % 12) + 'm';
+
+  // external links open in a new tab
+  document.querySelectorAll('a[href^="http"]').forEach(a => {
+    a.target = '_blank'; a.rel = 'noopener';
+  });
 
   // live contribution count; the baked-in number is the fallback
   if (location.protocol.startsWith('http')) {
