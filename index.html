@@ -917,6 +917,8 @@
   const mobileCurrent = document.getElementById('mobile-current');
   const playerHud = document.getElementById('player-hud');
   const commitGraph = document.querySelector('.commit-graph');
+  const commitGraphImage = commitGraph.querySelector('img');
+  const alignCommitGraphToNow = () => { commitGraph.scrollLeft = commitGraph.scrollWidth; };
   const setMenuOpen = open => {
     sideNav.classList.toggle('menu-open', open);
     menuToggle.setAttribute('aria-expanded', String(open));
@@ -958,7 +960,10 @@
     playerHud.tabIndex = showHud ? 0 : -1;
     reveal(target);
     if (target.id === 'status' && matchMedia('(max-width: 520px)').matches) {
-      requestAnimationFrame(() => { commitGraph.scrollLeft = commitGraph.scrollWidth; });
+      requestAnimationFrame(alignCommitGraphToNow);
+      if (!commitGraphImage.complete) {
+        commitGraphImage.addEventListener('load', alignCommitGraphToNow, { once: true });
+      }
     }
   }
   links.forEach(l => l.addEventListener('click', e => {
