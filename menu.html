@@ -234,6 +234,15 @@
   }
   .foot a { margin: 0 4px; }
 
+  /* ============ argus ============ */
+  ul.files { list-style: none; font-size: 13.5px; margin-top: 4px; }
+  ul.files li { display: flex; gap: 16px; padding: 8px 0; border-top: 1px dashed rgba(30,58,102,.6); }
+  ul.files li:first-child { border-top: none; }
+  ul.files .fn { color: var(--sys); width: 21ch; flex-shrink: 0; }
+  ul.files .fd { color: var(--text); }
+  .rules-mini p { color: var(--dim); font-size: 13.5px; margin-bottom: 7px; }
+  .rules-mini b { color: var(--gold); font-weight: 600; }
+
   /* ============ raid log / entries ============ */
   .entry { padding: 16px 0; border-top: 1px dashed var(--line); }
   .entry:first-of-type { border-top: none; padding-top: 0; }
@@ -331,6 +340,7 @@
       <ul class="menu-list">
         <li><a href="#status" class="active">Status</a></li>
         <li><a href="#premise">The Premise</a></li>
+        <li><a href="#argus">Argus</a></li>
         <li><a href="#raid-log">Raid Log</a></li>
         <li><a href="#career">Career Log</a></li>
         <li><a href="#side-quests">Side Quests</a></li>
@@ -402,6 +412,32 @@
           <p>The economics of software engineering changed in the span of about two years. Agents now write competent code, and most of the industry is still arguing about what that means for the profession. I skipped the argument. Agents take the repetitive work, and that's fine by me.</p>
           <p>I moved to the layer the new economics actually reward: <em>orchestration, verification, and the systems that make agent output trustworthy.</em> In practice, I run a fleet of coding agents. Work arrives as tasks on a board, each routed to the cheapest model tier that can handle the judgment it requires, and no result is accepted on the agent's word. Every claim of "done" is verified by something that didn't do the work.</p>
           <p>The models are commodities. The system around them is the durable advantage, and building that system is what this page documents.</p>
+          <p class="dim" style="font-size: 13.5px;">The system has a name. <a href="#argus" class="goto">Open ⟨ ARGUS ⟩</a></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ARGUS -->
+    <section class="section" id="argus">
+      <div class="win">
+        <div class="bar"><span>⟨ ARGUS ⟩</span><span class="dot">02 · PRIVATE REPO</span></div>
+        <div class="body">
+          <p>Argus is the repo that runs my fleet, named for the watchman with a hundred eyes. It holds the rules every agent on my machine loads before it touches anything: how work gets scoped, what requires my name on it, and how a claim becomes a fact. The repo stays private because it's the machinery. The shape of it isn't a secret:</p>
+          <ul class="files">
+            <li><span class="fn">workflow.md</span><span class="fd">how work moves: cards, waves, checkpoints, handoffs</span></li>
+            <li><span class="fn">guardrails.md</span><span class="fd">what agents may never do without me naming the action</span></li>
+            <li><span class="fn">gates-and-oracles.md</span><span class="fd">how a check earns trust: prove it can fail before believing it passes</span></li>
+            <li><span class="fn">delegation-briefs.md</span><span class="fd">how to brief a worker so "done" means done</span></li>
+            <li><span class="fn">repos/*.md</span><span class="fd">per-codebase knowledge, kept out of the core so the rules don't rot</span></li>
+            <li><span class="fn">sync.sh</span><span class="fd">one source of truth, generated into every tool's config on my machine</span></li>
+          </ul>
+          <div class="qsec">Rules, verbatim</div>
+          <div class="rules-mini">
+            <p><b>"A gate that has only ever passed is a guess."</b> Break it on purpose, watch it fail, then trust it.</p>
+            <p><b>"A worker reporting done starts verification. It never ends the work."</b></p>
+            <p><b>"Never present a skipped check as green."</b> Every check reports pass, fail, blocked, or not run.</p>
+          </div>
+          <p class="dim" style="font-size: 13px; margin-top: 14px;">Currently at v2.6. The version only moves when a rule survives contact with a real failure.</p>
         </div>
       </div>
     </section>
@@ -409,7 +445,7 @@
     <!-- RAID LOG -->
     <section class="section" id="raid-log">
       <div class="win">
-        <div class="bar"><span>⟨ RAID LOG ⟩</span><span class="dot">02</span></div>
+        <div class="bar"><span>⟨ RAID LOG ⟩</span><span class="dot">03</span></div>
         <div class="body">
           <div class="entry">
             <span class="tag">[INCIDENT]</span>
@@ -454,7 +490,7 @@
     <!-- CAREER -->
     <section class="section" id="career">
       <div class="win">
-        <div class="bar"><span>⟨ CAREER LOG ⟩</span><span class="dot">03</span></div>
+        <div class="bar"><span>⟨ CAREER LOG ⟩</span><span class="dot">04</span></div>
         <div class="body">
           <ul class="career">
             <li>
@@ -481,7 +517,7 @@
     <!-- SIDE QUESTS -->
     <section class="section" id="side-quests">
       <div class="win">
-        <div class="bar"><span>⟨ SIDE QUESTS ⟩</span><span class="dot">04 · OPEN SOURCE</span></div>
+        <div class="bar"><span>⟨ SIDE QUESTS ⟩</span><span class="dot">05 · OPEN SOURCE</span></div>
         <div class="body">
           <ul class="quests">
             <li><a class="qname" href="https://patchdeck-site.pages.dev">patchdeck</a><a class="qsrc" href="https://github.com/NikAtNight/patchdeck">[ source ]</a><span class="qdesc">A local-first desktop workbench for reviewing Git branches and coordinating AI agent tasks. The raid interface.</span></li>
@@ -497,7 +533,7 @@
     <!-- GUILD -->
     <section class="section" id="guild">
       <div class="win">
-        <div class="bar"><span>⟨ GUILD ⟩</span><span class="dot">05 · TALIX</span></div>
+        <div class="bar"><span>⟨ GUILD ⟩</span><span class="dot">06 · TALIX</span></div>
         <div class="body">
           <p><em>Talix</em> is the guild. Its main product is <a href="https://talix.app" style="color: var(--gold);">talix.app</a>, invoicing that gets out of your way. I run it with zero marketing spend.</p>
           <p class="dim" style="font-size: 13px;">This paragraph is the marketing.</p>
@@ -577,6 +613,14 @@
     const id = l.getAttribute('href').slice(1);
     history.replaceState(null, '', '#' + id);
     show(id);
+  }));
+  // in-content section links (e.g. Premise -> Argus)
+  document.querySelectorAll('a.goto').forEach(l => l.addEventListener('click', e => {
+    e.preventDefault();
+    const id = l.getAttribute('href').slice(1);
+    history.replaceState(null, '', '#' + id);
+    show(id);
+    scrollTo({ top: 0, behavior: 'smooth' });
   }));
 
   // sidebar + initial section
