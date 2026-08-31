@@ -42,8 +42,48 @@
     display: flex; gap: 26px; align-items: flex-start;
     max-width: 1160px; margin: 0 auto; padding: 44px 22px 120px;
   }
-  .side { width: 216px; flex-shrink: 0; position: sticky; top: 44px; }
+  .side {
+    width: 216px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 44px;
+  }
   .main { flex: 1; min-width: 0; }
+  @media (min-width: 901px) {
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+    .app {
+      height: calc(100dvh - 50px);
+      padding: 44px 22px 18px;
+      overflow: hidden;
+    }
+    .side {
+      position: static;
+    }
+    body.hud-visible .side {
+      margin-top: 59px;
+    }
+    .main {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .player-hud {
+      position: static;
+      flex: 0 0 auto;
+    }
+    .section.active {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+    .section > .win:last-child { margin-bottom: 0; }
+  }
 
   /* ============ the system panel ============ */
   .win {
@@ -130,12 +170,88 @@
     background: rgba(217, 180, 91, .07);
   }
   .menu-list a.active::before { color: var(--gold); }
+  .mobile-player, .menu-toggle { display: none; }
 
   .mini { font-size: 12px; }
   .mini .body { padding: 10px 16px; }
   .mini .row { display: flex; justify-content: space-between; padding: 2px 0; }
   .mini .row .k { color: var(--dim); letter-spacing: .1em; }
   .mini .row .v { color: var(--sys); }
+
+  /* ============ minimized player status ============ */
+  .player-hud {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    max-height: 0;
+    margin-bottom: 0;
+    padding: 0 16px;
+    overflow: hidden;
+    color: var(--text);
+    background: rgba(9, 16, 30, .98);
+    border: 0 solid var(--line);
+    box-shadow: 0 0 24px rgba(77, 163, 255, .12);
+    backdrop-filter: blur(12px);
+    opacity: 0;
+    transform: translateY(-10px) scaleY(.7);
+    transform-origin: top;
+    pointer-events: none;
+    transition: max-height .3s ease, margin-bottom .3s ease, padding .3s ease,
+      border-width .3s ease, opacity .2s ease, transform .3s ease;
+  }
+  .player-hud.visible {
+    max-height: 48px;
+    margin-bottom: 18px;
+    padding: 9px 16px;
+    border-width: 1px;
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+    overflow: visible;
+  }
+  .player-hud::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 0;
+    height: 2px;
+    width: 0;
+    background: linear-gradient(90deg, transparent, var(--sys), var(--gold), transparent);
+  }
+  .player-hud.visible::before { animation: hudLoad .65s ease-out forwards; }
+  @keyframes hudLoad { to { width: 100%; } }
+  .player-hud:hover { text-decoration: none; border-color: var(--line-bright); }
+  .hud-id { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+  .hud-clan { color: var(--gold); font-size: 11px; }
+  .hud-name {
+    color: #e8f4ff;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    white-space: nowrap;
+  }
+  .hud-stat {
+    display: flex;
+    gap: 5px;
+    margin-left: auto;
+    color: var(--dim);
+    font-size: 10.5px;
+    letter-spacing: .1em;
+    white-space: nowrap;
+  }
+  .hud-stat strong { color: var(--sys); font-size: 12px; font-weight: 600; }
+  .hud-xp strong { color: var(--gold); }
+  .hud-open {
+    padding-left: 16px;
+    border-left: 1px solid var(--line);
+    color: var(--dim);
+    font-size: 9.5px;
+    letter-spacing: .12em;
+    white-space: nowrap;
+  }
 
   /* ============ sections ============ */
   .section { display: none; }
@@ -250,7 +366,19 @@
     padding: 13px 22px;
     font-size: 13px;
   }
+  .foot-links { display: inline-flex; align-items: center; }
   .foot a { margin: 0 4px; }
+
+  .commit-graph {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-color: var(--line-bright) rgba(30, 58, 102, .25);
+    scrollbar-width: thin;
+  }
+  .commit-graph img { width: 100%; display: block; }
 
   /* ============ argus ============ */
   ul.files { list-style: none; font-size: 13.5px; margin-top: 4px; }
@@ -319,19 +447,131 @@
 
   /* ============ responsive ============ */
   @media (max-width: 900px) {
-    .app { flex-direction: column; }
-    .side { position: static; width: 100%; }
-    .menu-list { display: flex; flex-wrap: wrap; }
-    .menu-list a { border-left: none; border-bottom: 2px solid transparent; padding: 8px 12px; }
-    .menu-list a.active { border-bottom-color: var(--gold); }
+    .app { flex-direction: column; gap: 16px; padding: 16px 14px 100px; }
+    .main { width: 100%; }
+    .side { position: sticky; top: 0; z-index: 30; width: 100%; transition: none; }
+    .side .win:first-child {
+      margin-bottom: 0;
+      background: rgba(9, 16, 30, .98);
+      backdrop-filter: blur(12px);
+    }
+    .menu-bar { min-height: 42px; box-sizing: border-box; gap: 10px; }
+    .menu-title, .menu-clan { display: none; }
+    .mobile-player {
+      display: flex;
+      align-items: baseline;
+      gap: 7px;
+      min-width: 0;
+      color: #e8f4ff;
+      text-decoration: none;
+    }
+    .mobile-player:hover { text-decoration: none; }
+    .mobile-clan { color: var(--gold); font-size: 10px; }
+    .mobile-name {
+      overflow: hidden;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .mobile-level {
+      color: var(--dim);
+      font-size: 9.5px;
+      letter-spacing: .08em;
+      white-space: nowrap;
+    }
+    .mobile-level b { color: var(--sys); font-size: 11px; font-weight: 600; }
+    .menu-toggle {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-left: auto;
+      padding: 5px 0 5px 12px;
+      color: var(--gold);
+      background: none;
+      border: 0;
+      border-left: 1px solid var(--line);
+      font: inherit;
+      font-size: 10px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .menu-chevron { color: var(--line-bright); transition: transform .2s ease; }
+    .side.menu-open .menu-chevron { transform: rotate(180deg); }
+    .side .menu-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      max-height: 0;
+      overflow: hidden;
+      visibility: hidden;
+      opacity: 0;
+      pointer-events: none;
+      transition: max-height .28s ease, opacity .18s ease;
+    }
+    .side .win.on .menu-list { animation: none; opacity: 0; }
+    .side.menu-open .menu-list,
+    .side.menu-open .win.on .menu-list {
+      max-height: 260px;
+      visibility: visible;
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .menu-list a {
+      height: 100%;
+      box-sizing: border-box;
+      border-left: 2px solid transparent;
+      padding: 10px 12px;
+      font-size: 11.5px;
+    }
+    .menu-list a.active { border-left-color: var(--gold); }
     .mini { display: none; }
+    .player-hud { display: none; }
     .cols { grid-template-columns: 1fr; }
     .inv { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 520px) {
+    .win .body { padding: 18px; }
+    .commit-bar {
+      flex-direction: column;
+      align-items: flex-start !important;
+      gap: 3px;
+    }
+    .commit-bar .dot {
+      font-size: 10px;
+      letter-spacing: .1em;
+      line-height: 1.5;
+    }
+    .commit-graph { padding-bottom: 7px; }
+    .commit-graph img {
+      width: 663px;
+      max-width: none;
+    }
+    .inv { grid-template-columns: 1fr; }
+    .foot {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 2px;
+      padding: 8px 14px;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .foot-links { justify-content: center; gap: 10px; }
+    .foot-links .sep { display: none; }
+    .foot a { margin: 0; }
+  }
+  @media (max-width: 360px) {
+    .mobile-level { display: none; }
   }
   @media (prefers-reduced-motion: reduce) {
     .win, .sysline, .win .bar, .win .body, .win .menu-list { opacity: 1 !important; transform: none !important; animation: none !important; }
     .meter .shine, #intro .cont { animation: none !important; }
     .meter .fill { transition: none; }
+    .player-hud { transition: none; }
+    .player-hud.visible::before { width: 100%; animation: none; }
   }
 </style>
 </head>
@@ -355,8 +595,19 @@
   <!-- game menu sidebar -->
   <nav class="side">
     <div class="win">
-      <div class="bar"><span>⟨ MENU ⟩</span><span class="dot" style="color: var(--gold);" title="NikAtNight">[NaN]</span></div>
-      <ul class="menu-list">
+      <div class="bar menu-bar">
+        <span class="menu-title">⟨ MENU ⟩</span>
+        <a class="mobile-player goto" href="#status" aria-label="Open player status">
+          <span class="mobile-clan">[NaN]</span>
+          <span class="mobile-name">Nikhil Kapadia</span>
+          <span class="mobile-level">LV. <b id="mobile-level">29</b></span>
+        </a>
+        <button class="menu-toggle" id="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu" aria-label="Open navigation">
+          <span id="mobile-current">Status</span><span class="menu-chevron">⌄</span>
+        </button>
+        <span class="dot menu-clan" style="color: var(--gold);" title="NikAtNight">[NaN]</span>
+      </div>
+      <ul class="menu-list" id="site-menu">
         <li><a href="#status" class="active">Status</a></li>
         <li><a href="#about">About</a></li>
         <li><a href="#premise">The Premise</a></li>
@@ -377,6 +628,13 @@
   </nav>
 
   <main class="main">
+
+    <a class="player-hud goto" id="player-hud" href="#status" aria-label="Open player status" aria-hidden="true">
+      <span class="hud-id"><span class="hud-clan">[NaN]</span><span class="hud-name">Nikhil Kapadia</span></span>
+      <span class="hud-stat"><span>LV.</span><strong id="hud-level">29</strong></span>
+      <span class="hud-stat hud-xp"><span>XP</span><strong>2,610</strong></span>
+      <span class="hud-open">View status ◆</span>
+    </a>
 
     <!-- STATUS -->
     <section class="section active" id="status">
@@ -400,9 +658,11 @@
       </div>
 
       <div class="win">
-        <div class="bar"><span>⟨ COMMIT LOG ⟩</span><span class="dot">GITHUB · <span class="gold" id="gh-count">2,639</span> CONTRIBUTIONS · LAST 12 MONTHS</span></div>
+        <div class="bar commit-bar"><span>⟨ COMMIT LOG ⟩</span><span class="dot">GITHUB · <span class="gold" id="gh-count">2,639</span> CONTRIBUTIONS · LAST 12 MONTHS</span></div>
         <div class="body">
-          <img src="ghchart.svg" onerror="this.onerror=null; this.src='https://ghchart.rshah.org/d9b45b/NikAtNight';" alt="GitHub contribution graph for NikAtNight" style="width: 100%; display: block;">
+          <div class="commit-graph" tabindex="0" aria-label="Scrollable GitHub contribution graph">
+            <img src="ghchart.svg" onerror="this.onerror=null; this.src='https://ghchart.rshah.org/d9b45b/NikAtNight';" alt="GitHub contribution graph for NikAtNight">
+          </div>
         </div>
       </div>
 
@@ -419,7 +679,7 @@
             <div class="item"><span class="yr">RARE</span><span class="nm">AI features</span><span class="sb"><i>LangChain</i><i>RAG</i><i>OpenSearch</i></span><span class="ys">3 yr</span></div>
             <div class="item"><span class="yr">RARE</span><span class="nm">Desktop apps</span><span class="sb"><i>Tauri</i><i>Rust</i></span><span class="fl">signed and notarized</span><span class="ys">1 yr</span></div>
           </div>
-          <div class="inv-note">MYTHIC = SIGNATURE · TIER CLIMBS WITH YEARS OF USE</div>
+          <div class="inv-note">TIER = RARITY · YEARS = EXPERIENCE</div>
         </div>
       </div>
     </section>
@@ -527,20 +787,32 @@
         <div class="body">
           <ul class="career">
             <li>
-              <span class="crow"><span class="role">Senior Software Engineer · <b>BombBomb</b></span><span class="when">Dec 2024 to present</span></span>
+              <span class="crow"><span class="role">Senior Software Engineer · <a href="https://bombbomb.com/"><b>BombBomb</b></a></span><span class="when">Dec 2024 to present</span></span>
               <span class="cdesc">Custom component library on shadcn/ui, an Auth0 onboarding flow with feature-flagged A/B trials, AI-generated video titles, summaries and campaigns, and an async polling handler that delivers AI results reliably at scale.</span>
             </li>
             <li>
-              <span class="crow"><span class="role">Senior Full-Stack, then Frontend Engineer · <b>Olive</b></span><span class="when">Jun 2022 to Oct 2024</span></span>
+              <span class="crow"><span class="role">Senior Full-Stack, then Frontend Engineer · <a href="https://olive.app/"><b>Olive</b></a></span><span class="when">Jun 2022 to Oct 2024</span></span>
               <span class="cdesc">Claude integrated via LangChain, a RAG pipeline on AWS OpenSearch with vector embeddings, Django REST APIs with automated Selenium testing, and the feature-flag management UI used by both dev and product.</span>
             </li>
             <li>
-              <span class="crow"><span class="role">Frontend Engineer · <b>Optima Holdings</b></span><span class="when">Jan 2022 to Oct 2023</span></span>
+              <span class="crow"><span class="role">Frontend Engineer · <a href="https://www.optima-holdings.com/"><b>Optima Holdings</b></a></span><span class="when">Jan 2022 to Oct 2023</span></span>
               <span class="cdesc">Next.js and tRPC performance work that cut API calls by 60%, Stripe payments handling 10k+ monthly transactions, and a Chrome extension streaming live ML trading signals over WebSockets.</span>
             </li>
             <li>
-              <span class="crow"><span class="role">Earlier runs</span><span class="when">2018 to 2022</span></span>
-              <span class="cdesc">JAPR Tech (React, then technical analyst), Emailgistics, RBC. Sheridan College, Computer Systems Technology.</span>
+              <span class="crow"><span class="role">Developer / Technical Analyst · <a href="https://japrtech.com/"><b>JAPR Tech</b></a></span><span class="when">Sep 2021 to Feb 2022</span></span>
+              <span class="cdesc">Wrote the user stories behind the development queue, ran team planning meetings, assigned work, reviewed code, and helped raise completed story volume by 16%.</span>
+            </li>
+            <li>
+              <span class="crow"><span class="role">React Developer · <a href="https://japrtech.com/"><b>JAPR Tech</b></a></span><span class="when">Apr 2021 to Sep 2021</span></span>
+              <span class="cdesc">Rebuilt shared React components, fixed frontend defects, added Jest coverage, and normalized application data so components could share it cleanly.</span>
+            </li>
+            <li>
+              <span class="crow"><span class="role">Junior Full-Stack Software Developer · <a href="https://emailgistics.com/"><b>Emailgistics</b></a></span><span class="when">Sep 2019 to Dec 2019</span></span>
+              <span class="cdesc">Worked across Go microservices and UI, including a load-testing application that measured how much traffic the company's services could handle.</span>
+            </li>
+            <li>
+              <span class="crow"><span class="role">Analytics Engineer Co-op · <b>RBC</b></span><span class="when">Jan 2019 to Apr 2019</span></span>
+              <span class="cdesc">Built Python tools to track stock trends across quantitative funds, chart large datasets, and convert audio to text for investment analysis.</span>
             </li>
           </ul>
         </div>
@@ -578,14 +850,16 @@
 </div>
 
 <footer class="foot">
-  <span class="dim">[System] Party invite:</span>
-  <a href="mailto:nikhil.kapadia.97@gmail.com">accept via email</a>
-  <span class="dim">·</span>
-  <a href="https://github.com/NikAtNight">github</a>
-  <span class="dim">·</span>
-  <a href="https://www.linkedin.com/in/nikhilkapadia-/">linkedin</a>
-  <span class="dim">·</span>
-  <a href="Nikhil_Kapadia_Resume.pdf" download>resume</a>
+  <span class="dim foot-label">[System] Party invite:</span>
+  <nav class="foot-links" aria-label="Contact links">
+    <a href="mailto:nikhil.kapadia.97@gmail.com">email</a>
+    <span class="dim sep">·</span>
+    <a href="https://github.com/NikAtNight">github</a>
+    <span class="dim sep">·</span>
+    <a href="https://www.linkedin.com/in/nikhilkapadia-/">linkedin</a>
+    <span class="dim sep">·</span>
+    <a href="Nikhil_Kapadia_Resume.pdf" download>resume</a>
+  </nav>
 </footer>
 
 <script>
@@ -598,6 +872,8 @@
   if (now.getMonth() < BIRTHDATE.getMonth() ||
       (now.getMonth() === BIRTHDATE.getMonth() && now.getDate() < BIRTHDATE.getDate())) age--;
   document.getElementById('level').textContent = age;
+  document.getElementById('hud-level').textContent = age;
+  document.getElementById('mobile-level').textContent = age;
 
   // playtime = time since first engineering role (May 2018)
   const START = new Date(2018, 4, 1);
@@ -636,6 +912,20 @@
   // section switching with replayed window animations
   const links = document.querySelectorAll('.menu-list a');
   const sections = document.querySelectorAll('.section');
+  const sideNav = document.querySelector('.side');
+  const menuToggle = document.getElementById('menu-toggle');
+  const mobileCurrent = document.getElementById('mobile-current');
+  const playerHud = document.getElementById('player-hud');
+  const commitGraph = document.querySelector('.commit-graph');
+  const setMenuOpen = open => {
+    sideNav.classList.toggle('menu-open', open);
+    menuToggle.setAttribute('aria-expanded', String(open));
+    menuToggle.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+  };
+  menuToggle.addEventListener('click', () => setMenuOpen(!sideNav.classList.contains('menu-open')));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') setMenuOpen(false);
+  });
   function reveal(section) {
     section.querySelectorAll('.win').forEach((w, i) => {
       w.classList.remove('on');
@@ -656,8 +946,20 @@
     const target = document.getElementById(id) || document.getElementById('status');
     sections.forEach(s => s.classList.remove('active'));
     links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + target.id));
+    const activeLink = [...links].find(l => l.getAttribute('href') === '#' + target.id);
     target.classList.add('active');
+    mobileCurrent.textContent = activeLink ? activeLink.textContent.trim() : 'Status';
+    setMenuOpen(false);
+    const showHud = target.id !== 'status';
+    if (!showHud && document.activeElement === playerHud) playerHud.blur();
+    document.body.classList.toggle('hud-visible', showHud);
+    playerHud.classList.toggle('visible', showHud);
+    playerHud.setAttribute('aria-hidden', String(!showHud));
+    playerHud.tabIndex = showHud ? 0 : -1;
     reveal(target);
+    if (target.id === 'status' && matchMedia('(max-width: 520px)').matches) {
+      requestAnimationFrame(() => { commitGraph.scrollLeft = commitGraph.scrollWidth; });
+    }
   }
   links.forEach(l => l.addEventListener('click', e => {
     e.preventDefault();
