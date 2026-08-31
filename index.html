@@ -220,6 +220,8 @@
   .item.g3 { border-color: rgba(217, 180, 91, .5); box-shadow: inset 0 0 16px rgba(217, 180, 91, .06); }
   .item.g3 .nm, .item.g3 .yr { color: var(--gold); }
   .item.g2 { border-color: var(--line-bright); }
+  .item.g2 .yr { color: var(--gold); }
+  .item.g1 .yr { color: var(--sys); }
   .item.empty { border-style: dashed; opacity: .4; }
   .inv-note { margin-top: 12px; font-size: 11px; color: var(--dim); letter-spacing: .08em; }
 
@@ -392,16 +394,16 @@
         <div class="bar"><span>⟨ LOADOUT ⟩</span><span class="dot">EQUIPPED</span></div>
         <div class="body">
           <div class="inv">
-            <div class="item g3"><span class="yr">SIG</span><span class="nm">Agent fleet</span><span class="sb">Claude orchestrates · Codex implements · Hermes dispatches</span></div>
-            <div class="item g3"><span class="yr">SIG</span><span class="nm">Git worktrees</span><span class="sb">one per instance · one per agent</span></div>
-            <div class="item g2"><span class="yr">6 yr</span><span class="nm">TypeScript</span><span class="sb">React · Next.js · antd · Storybook</span></div>
-            <div class="item g2"><span class="yr">6 yr</span><span class="nm">SQL</span><span class="sb">MySQL · PostgreSQL · TypeORM</span></div>
-            <div class="item g2"><span class="yr">5 yr</span><span class="nm">Backends</span><span class="sb">NestJS · Django · PHP · REST</span></div>
-            <div class="item g2"><span class="yr">5 yr</span><span class="nm">Docker</span><span class="sb">multi-instance envs on one laptop</span></div>
-            <div class="item"><span class="yr">1 yr</span><span class="nm">Tauri · Rust</span><span class="sb">signed, notarized desktop apps</span></div>
+            <div class="item g3"><span class="yr">MYTHIC</span><span class="nm">Agent fleet</span><span class="sb">Claude orchestrates · Codex implements · Hermes dispatches</span></div>
+            <div class="item g3"><span class="yr">MYTHIC</span><span class="nm">Git worktrees</span><span class="sb">one per instance · one per agent</span></div>
+            <div class="item g2"><span class="yr">LEGENDARY</span><span class="nm">TypeScript</span><span class="sb">React · Next.js · antd · Storybook · 6 yr</span></div>
+            <div class="item g2"><span class="yr">LEGENDARY</span><span class="nm">SQL</span><span class="sb">MySQL · PostgreSQL · TypeORM · 6 yr</span></div>
+            <div class="item g1"><span class="yr">EPIC</span><span class="nm">Backends</span><span class="sb">NestJS · Django · PHP · REST · 5 yr</span></div>
+            <div class="item g1"><span class="yr">EPIC</span><span class="nm">Docker</span><span class="sb">multi-instance envs on one laptop · 5 yr</span></div>
+            <div class="item"><span class="yr">RARE</span><span class="nm">Tauri · Rust</span><span class="sb">signed, notarized desktop apps · 1 yr</span></div>
             <div class="item empty"><span class="nm">———</span><span class="sb">open slot</span></div>
           </div>
-          <div class="inv-note">GOLD = SIGNATURE GEAR · GRADE SCALES WITH YEARS OF USE</div>
+          <div class="inv-note">MYTHIC = SIGNATURE GEAR · TIER CLIMBS WITH YEARS OF USE</div>
         </div>
       </div>
     </section>
@@ -620,8 +622,13 @@
       setTimeout(() => w.classList.add('on'), reduced ? 0 : i * 130);
     });
     section.querySelectorAll('.fill').forEach((f, i) => {
+      // reset instantly (no transition) so the bar never animates downward, then
+      // grow only after the panel's content fade has fully settled
+      f.style.transition = 'none';
       f.style.width = '0';
-      setTimeout(() => { f.style.width = f.dataset.w; }, reduced ? 0 : 500 + i * 200);
+      void f.offsetWidth;
+      f.style.transition = '';
+      setTimeout(() => { f.style.width = f.dataset.w; }, reduced ? 0 : 900 + i * 200);
     });
   }
   function show(id) {
