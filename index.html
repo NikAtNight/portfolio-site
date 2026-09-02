@@ -383,7 +383,23 @@
     scrollbar-color: var(--line-bright) rgba(30, 58, 102, .25);
     scrollbar-width: thin;
   }
-  .commit-graph img { width: 100%; display: block; }
+  .commit-graph img, .commit-graph svg { width: 100%; display: block; }
+  .gh-tip {
+    position: absolute;
+    z-index: 2;
+    display: none;
+    padding: 6px 10px;
+    border: 1px solid var(--line-bright);
+    border-radius: 4px;
+    background: var(--panel);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.4;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .gh-tip.show { display: block; }
 
   /* ============ argus ============ */
   ul.files { list-style: none; font-size: 13.5px; margin-top: 4px; }
@@ -581,7 +597,7 @@
       line-height: 1.5;
     }
     .commit-graph { padding-bottom: 7px; }
-    .commit-graph img {
+    .commit-graph img, .commit-graph svg {
       width: 663px;
       max-width: none;
     }
@@ -969,14 +985,6 @@
     a.target = '_blank'; a.rel = 'noopener';
   });
 
-  // live contribution count; the baked-in number is the fallback
-  if (location.protocol.startsWith('http')) {
-    fetch('/api/stats')
-      .then(r => (r.ok ? r.json() : null))
-      .then(d => { if (d && d.ok) document.getElementById('gh-count').textContent = d.contributions; })
-      .catch(() => {});
-  }
-
   // local clock, live
   const clock = document.getElementById('clock');
   const tick = () => clock.textContent =
@@ -1001,8 +1009,103 @@
   const mobileCurrent = document.getElementById('mobile-current');
   const playerHud = document.getElementById('player-hud');
   const commitGraph = document.querySelector('.commit-graph');
-  const commitGraphImage = commitGraph.querySelector('img');
-  const alignCommitGraphToNow = () => { commitGraph.scrollLeft = commitGraph.scrollWidth; };
+  const graphVisual = () => commitGraph.querySelector('svg, img');
+  const alignCommitGraphToNow = () => {
+    if (graphVisual()) commitGraph.scrollLeft = commitGraph.scrollWidth;
+  };
+  const dateFormat = new Intl.DateTimeFormat('en-US', {
+    weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
+  });
+  const displayDate = date => new Date(`${date}T00:00:00`);
+  const svgElement = (name, attributes = {}) => {
+    const element = document.createElementNS('http://www.w3.org/2000/svg', name);
+    Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+    return element;
+  };
+  const renderContributionGraph = days => {
+    const svg = svgElement('svg', {
+      viewBox: '0 0 663 104', width: '663', height: '104',
+      role: 'img', 'aria-label': 'GitHub contribution graph for NikAtNight'
+    });
+    const firstSunday = new Date(`${days[0].date}T00:00:00Z`);
+    firstSunday.setUTCDate(firstSunday.getUTCDate() - firstSunday.getUTCDay());
+    [['Mon', 40], ['Wed', 64], ['Fri', 89]].forEach(([label, y]) => {
+      const text = svgElement('text', { x: '0', y, fill: '#6d829e', 'font-family': 'system-ui, sans-serif', 'font-size': '10' });
+      text.textContent = label;
+      svg.append(text);
+    });
+    const colours = ['#111a2a', '#5f4c22', '#8b6b2d', '#b8923f', '#d9b45b'];
+    const monthFormatter = new Intl.DateTimeFormat('en-US', { month: 'short', timeZone: 'UTC' });
+    const host = commitGraph.parentElement;
+    host.style.position = 'relative';
+    const tip = document.createElement('div');
+    tip.className = 'gh-tip';
+    tip.id = 'gh-tip';
+    tip.setAttribute('role', 'tooltip');
+    host.append(tip);
+    const hideTip = () => tip.classList.remove('show');
+    const positionTip = cell => {
+      const cellRect = cell.getBoundingClientRect();
+      const hostRect = host.getBoundingClientRect();
+      const left = Math.min(Math.max(8, cellRect.left + cellRect.width / 2 - tip.offsetWidth / 2), window.innerWidth - tip.offsetWidth - 8);
+      let top = cellRect.top - hostRect.top - tip.offsetHeight - 8;
+      if (cellRect.top - tip.offsetHeight - 8 < 8) top = cellRect.bottom - hostRect.top + 8;
+      tip.style.left = `${left - hostRect.left}px`;
+      tip.style.top = `${top}px`;
+    };
+    const showTip = cell => {
+      const count = Number(cell.dataset.count);
+      const date = displayDate(cell.dataset.date);
+      const contributionText = count ? `${count} contribution${count === 1 ? '' : 's'}` : 'No contributions';
+      tip.textContent = `${contributionText} · ${dateFormat.format(date)}`;
+      tip.classList.add('show');
+      positionTip(cell);
+    };
+    days.forEach(day => {
+      const date = new Date(`${day.date}T00:00:00Z`);
+      const week = Math.floor((date - firstSunday) / 604800000);
+      if (date.getUTCDay() === 0 && date.getUTCDate() <= 7) {
+        const label = svgElement('text', { x: String(27 + week * 12), y: '10', fill: '#6d829e', 'font-family': 'system-ui, sans-serif', 'font-size': '10' });
+        label.textContent = monthFormatter.format(date);
+        svg.append(label);
+      }
+      const count = Number(day.count);
+      const contributionText = count ? `${count} contribution${count === 1 ? '' : 's'}` : 'No contributions';
+      const cell = svgElement('rect', {
+        x: String(27.5 + week * 12), y: String(20.5 + date.getUTCDay() * 12),
+        width: '9', height: '9', rx: '2', fill: colours[day.level], tabindex: '0',
+        'aria-label': `${contributionText} on ${dateFormat.format(date)}`
+      });
+      cell.dataset.count = count;
+      cell.dataset.date = day.date;
+      cell.addEventListener('mouseenter', () => showTip(cell));
+      cell.addEventListener('mousemove', () => positionTip(cell));
+      cell.addEventListener('mouseleave', hideTip);
+      cell.addEventListener('focus', () => showTip(cell));
+      cell.addEventListener('blur', hideTip);
+      cell.addEventListener('click', () => showTip(cell));
+      svg.append(cell);
+    });
+    document.addEventListener('pointerdown', event => {
+      if (!event.target.closest('[data-date]')) hideTip();
+    });
+    commitGraph.replaceChildren(svg);
+    alignCommitGraphToNow();
+  };
+  const loadStatsFallback = () => fetch('/api/stats')
+    .then(response => (response.ok ? response.json() : null))
+    .then(data => { if (data?.ok) document.getElementById('gh-count').textContent = data.contributions; })
+    .catch(() => {});
+  if (location.protocol.startsWith('http')) {
+    fetch('/api/contributions')
+      .then(response => (response.ok ? response.json() : null))
+      .then(data => {
+        if (!data?.ok || !Array.isArray(data.days) || !Number.isFinite(data.total)) throw new Error('Contribution data unavailable');
+        document.getElementById('gh-count').textContent = Number(data.total).toLocaleString('en-US');
+        renderContributionGraph(data.days);
+      })
+      .catch(loadStatsFallback);
+  }
   const setMenuOpen = open => {
     sideNav.classList.toggle('menu-open', open);
     menuToggle.setAttribute('aria-expanded', String(open));
@@ -1045,8 +1148,9 @@
     reveal(target);
     if (target.id === 'status' && matchMedia('(max-width: 520px)').matches) {
       requestAnimationFrame(alignCommitGraphToNow);
-      if (!commitGraphImage.complete) {
-        commitGraphImage.addEventListener('load', alignCommitGraphToNow, { once: true });
+      const visual = graphVisual();
+      if (visual?.tagName === 'IMG' && !visual.complete) {
+        visual.addEventListener('load', alignCommitGraphToNow, { once: true });
       }
     }
   }
