@@ -385,7 +385,8 @@
   }
   .commit-graph img, .commit-graph svg { width: 100%; display: block; }
   .gh-tip {
-    position: absolute;
+    /* Fixed and attached to body so no panel or scroll container can clip it. */
+    position: fixed;
     z-index: 2;
     display: none;
     padding: 6px 10px;
@@ -1036,21 +1037,18 @@
     });
     const colours = ['#111a2a', '#5f4c22', '#8b6b2d', '#b8923f', '#d9b45b'];
     const monthFormatter = new Intl.DateTimeFormat('en-US', { month: 'short', timeZone: 'UTC' });
-    const host = commitGraph.parentElement;
-    host.style.position = 'relative';
     const tip = document.createElement('div');
     tip.className = 'gh-tip';
     tip.id = 'gh-tip';
     tip.setAttribute('role', 'tooltip');
-    host.append(tip);
+    document.body.append(tip);
     const hideTip = () => tip.classList.remove('show');
     const positionTip = cell => {
       const cellRect = cell.getBoundingClientRect();
-      const hostRect = host.getBoundingClientRect();
       const left = Math.min(Math.max(8, cellRect.left + cellRect.width / 2 - tip.offsetWidth / 2), window.innerWidth - tip.offsetWidth - 8);
-      let top = cellRect.top - hostRect.top - tip.offsetHeight - 8;
-      if (cellRect.top - tip.offsetHeight - 8 < 8) top = cellRect.bottom - hostRect.top + 8;
-      tip.style.left = `${left - hostRect.left}px`;
+      let top = cellRect.top - tip.offsetHeight - 8;
+      if (top < 8) top = cellRect.bottom + 8;
+      tip.style.left = `${left}px`;
       tip.style.top = `${top}px`;
     };
     const showTip = cell => {
