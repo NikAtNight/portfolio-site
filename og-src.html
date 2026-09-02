@@ -1,6 +1,7 @@
 <!doctype html>
 <!-- Source for og.png. Regenerate with:
-     chrome --headless --window-size=1200,630 --screenshot=og.png og-src.html -->
+     chrome --headless --window-size=1200,630 --screenshot=og.png og-src.html
+     or: swift scripts/render-og.swift "$PWD/og-src.html" og.png 1200 630 -->
 <html>
 <head>
 <meta charset="utf-8">
@@ -39,8 +40,10 @@
   .body { display: flex; align-items: center; gap: 46px; padding: 52px 56px; }
   .badge { width: 190px; height: 190px; flex-shrink: 0; }
   .name {
-    font-size: 58px; font-weight: 700;
-    letter-spacing: .1em; text-transform: uppercase;
+    /* 632px of room: 14 uppercase mono glyphs plus the clan tag only fit
+       at this size and tracking. Check the render after any change. */
+    font-size: 50px; font-weight: 700;
+    letter-spacing: .05em; text-transform: uppercase;
     color: #e8f4ff;
     text-shadow: 0 0 24px rgba(77, 163, 255, .6);
     white-space: nowrap;
@@ -76,7 +79,7 @@
         <div class="name"><span class="clan">[NaN]</span> Nikhil Kapadia</div>
         <div class="class-line">Senior Software Engineer · <b>Agent Orchestrator</b></div>
         <div class="meter"><div class="fill"></div></div>
-        <div class="meter-label"><span>Exp: agent sessions orchestrated</span><span class="val">2,610 / ∞</span></div>
+        <div class="meter-label"><span>Exp: agent sessions orchestrated</span><span class="val">2,785 / ∞</span></div>
       </div>
     </div>
   </div>

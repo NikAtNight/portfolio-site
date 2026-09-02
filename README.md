@@ -12,4 +12,4 @@ That copies the static files into `dist/` and uploads them with wrangler. The Pa
 
 ## Editing
 
-Everything visible lives in `index.html`. `og-src.html` is the source for the social card image; re-render `og.png` from it if the card changes. `archive/` holds old versions and is not deployed.
+Everything visible lives in `index.html`. `og-src.html` is the source for the social card image. Re-render it with `swift scripts/render-og.swift "$PWD/og-src.html" og.png 1200 630` after any change, and check the name still fits. `archive/` holds old versions and is not deployed.
