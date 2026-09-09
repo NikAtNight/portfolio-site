@@ -853,22 +853,22 @@
       <div class="win">
         <div class="bar"><span>⟨ ARGUS ⟩</span><span class="dot">05 · PRIVATE REPO</span></div>
         <div class="body">
-          <p>Argus is the repo that runs my fleet, named for the watchman with a hundred eyes. It holds the rules every agent on my machine loads before it touches anything: how work gets scoped, what requires my name on it, and how a claim becomes a fact. The repo stays private because it's the machinery. The shape of it isn't a secret:</p>
+          <p>Argus holds the coding standards and skills I use with agents every day. The same shared standards feed my Hermes profiles, which add their own rules for autonomous work. Version 5.0 separates those layers so a normal coding session doesn't inherit fleet procedures. The repo is private; here's how it's organized:</p>
           <ul class="files">
-            <li><span class="fn">workflow.md</span><span class="fd">how work moves: cards, waves, checkpoints, handoffs</span></li>
-            <li><span class="fn">guardrails.md</span><span class="fd">what agents may never do without me naming the action</span></li>
-            <li><span class="fn">gates-and-oracles.md</span><span class="fd">how a check earns trust: prove it can fail before believing it passes</span></li>
-            <li><span class="fn">delegation-briefs.md</span><span class="fd">how to brief a worker so "done" means done</span></li>
-            <li><span class="fn">repos/*.md</span><span class="fd">per-codebase knowledge, kept out of the core so the rules don't rot</span></li>
-            <li><span class="fn">sync.sh</span><span class="fd">one source of truth, generated into every tool's config on my machine</span></li>
+            <li><span class="fn">globals/AGENTS.md</span><span class="fd">shared coding standards, permissions, and verification practices</span></li>
+            <li><span class="fn">globals/CLAUDE.md</span><span class="fd">Claude-specific guidance that imports the shared standards</span></li>
+            <li><span class="fn">skills/</span><span class="fd">reusable tools, including unslop for cutting fluff from every response</span></li>
+            <li><span class="fn">agent-workflow/</span><span class="fd">Hermes autonomy: cards, workers, reviews, and profile boundaries</span></li>
+            <li><span class="fn">repo-skills/</span><span class="fd">project-specific knowledge kept separate from personal defaults</span></li>
+            <li><span class="fn">sync.sh</span><span class="fd">installs each layer where it belongs, backs up changes, and protects local edits</span></li>
           </ul>
-          <div class="qsec">Rules, verbatim</div>
+          <div class="qsec">From the Hermes workflow</div>
           <div class="rules-mini">
             <p><b>"A gate that has only ever passed is a guess."</b> Break it on purpose, watch it fail, then trust it.</p>
             <p><b>"A worker reporting done starts verification. It never ends the work."</b></p>
             <p><b>"Never present a skipped check as green."</b> Every check reports pass, fail, blocked, or not run.</p>
           </div>
-          <p class="dim" style="font-size: 13px; margin-top: 14px;">Currently at v3.9. The version only moves when a rule survives contact with a real failure.</p>
+          <p class="dim" style="font-size: 13px; margin-top: 14px;">Currently at v5.0. Shared standards live in one place; Hermes adds its autonomy rules when they're needed.</p>
         </div>
       </div>
     </section>
