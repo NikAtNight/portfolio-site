@@ -361,6 +361,51 @@
   .item.g1 { border-color: rgba(176, 124, 232, .4); }
   .item.g1 .yr { color: #b07ce8; }
   .item.empty { border-style: dashed; opacity: .4; }
+  .item:focus-visible { outline: 1px solid var(--sys); outline-offset: 2px; }
+  .item .tip { display: none; }
+  /* skill breakdown: one floating system window, filled from the hovered card's .tip */
+  .item-tip {
+    --r: var(--sys);
+    position: fixed; z-index: 40;
+    width: 300px; max-width: calc(100vw - 16px);
+    padding: 12px 14px 13px;
+    background: rgba(9, 16, 30, .97);
+    border: 1px solid color-mix(in srgb, var(--r) 60%, transparent);
+    box-shadow: 0 0 22px color-mix(in srgb, var(--r) 22%, transparent), inset 0 0 18px color-mix(in srgb, var(--r) 7%, transparent);
+    font-size: 12px; line-height: 1.55;
+    pointer-events: none;
+    opacity: 0; visibility: hidden;
+    transform: translateY(4px);
+    transition: opacity .14s, transform .14s, visibility .14s;
+  }
+  .item-tip.show { opacity: 1; visibility: visible; transform: none; }
+  .item-tip::before {
+    content: '';
+    position: absolute; top: -1px; left: 0;
+    width: 100%; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--r), transparent);
+  }
+  .item-tip .tip-head {
+    display: flex; justify-content: space-between; gap: 10px;
+    font-size: 10px; letter-spacing: .14em; color: var(--r);
+  }
+  .item-tip .tip-head .dim { letter-spacing: .08em; }
+  .item-tip .tip-nm { display: block; margin: 4px 0 2px; font-size: 14px; font-weight: 700; color: #e8f4ff; }
+  .item-tip.g3 .tip-nm { color: var(--gold); text-shadow: 0 0 10px rgba(217, 180, 91, .35); }
+  .item-tip .tip-src { display: block; font-size: 10.5px; color: var(--dim); }
+  .item-tip .tip-src::before { content: 'DROPS FROM  '; white-space: pre; letter-spacing: .1em; color: var(--line-bright); }
+  .item-tip .tip-fx {
+    display: block; margin-top: 9px; padding-top: 9px;
+    border-top: 1px dashed var(--line);
+  }
+  .item-tip .tip-fx::before { content: 'EFFECTS'; display: block; margin-bottom: 4px; font-size: 10px; letter-spacing: .14em; color: var(--sys); }
+  .item-tip .tip-fx span { display: block; position: relative; padding-left: 14px; margin-top: 3px; color: var(--text); }
+  .item-tip .tip-fx span::before { content: '▸'; position: absolute; left: 0; color: var(--r); }
+  .item-tip .tip-quote {
+    display: block; margin-top: 9px; padding-top: 9px;
+    border-top: 1px dashed var(--line);
+    font-style: italic; color: var(--dim); font-size: 11.5px;
+  }
   .inv-note { margin-top: 12px; font-size: 11px; color: var(--dim); letter-spacing: .08em; }
 
   .foot {
@@ -630,6 +675,7 @@
     .meter .fill { transition: none; }
     .player-hud { transition: none; }
     .player-hud.visible::before { width: 100%; animation: none; }
+    .item-tip { transition: none; transform: none; }
   }
 </style>
 </head>
@@ -753,14 +799,14 @@
         <div class="bar"><span>⟨ SKILLS ⟩</span><span class="dot">UNLOCKED</span></div>
         <div class="body">
           <div class="inv">
-            <div class="item g3"><span class="yr">MYTHIC</span><span class="nm">Agent orchestration</span><span class="sb"><i>Claude</i><i>Codex</i><i>Hermes</i></span><span class="fl">skills that review the way I do</span><span class="ys">2 yr</span></div>
-            <div class="item g2"><span class="yr">LEGENDARY</span><span class="nm">Full-stack TypeScript</span><span class="sb"><i>React</i><i>Next.js</i><i>Node</i><i>antd</i><i>Storybook</i></span><span class="ys">6 yr</span></div>
-            <div class="item g2"><span class="yr">LEGENDARY</span><span class="nm">Data and APIs</span><span class="sb"><i>MySQL</i><i>PostgreSQL</i><i>TypeORM</i><i>Django REST</i></span><span class="ys">6 yr</span></div>
-            <div class="item g1"><span class="yr">EPIC</span><span class="nm">Parallel environments</span><span class="sb"><i>Docker</i><i>git worktrees</i></span><span class="fl">one isolated env per agent</span><span class="ys">5 yr</span></div>
-            <div class="item g1"><span class="yr">EPIC</span><span class="nm">Auth and integrations</span><span class="sb"><i>Keycloak</i><i>Auth0</i><i>Stripe</i><i>S3</i></span><span class="ys">5 yr</span></div>
-            <div class="item g1"><span class="yr">EPIC</span><span class="nm">Pixel-parity QA</span><span class="sb"><i>Storybook</i><i>screenshot loops</i></span><span class="fl">agents chase staging until the diff is zero</span><span class="ys">2 yr</span></div>
-            <div class="item"><span class="yr">RARE</span><span class="nm">AI features</span><span class="sb"><i>LangChain</i><i>RAG</i><i>OpenSearch</i></span><span class="ys">3 yr</span></div>
-            <div class="item"><span class="yr">RARE</span><span class="nm">Desktop apps</span><span class="sb"><i>Tauri</i><i>Rust</i></span><span class="fl">signed and notarized</span><span class="ys">1 yr</span></div>
+            <div class="item g3" tabindex="0"><span class="yr">MYTHIC</span><span class="nm">Agent orchestration</span><span class="sb"><i>Claude</i><i>Codex</i><i>Hermes</i></span><span class="fl">skills that review the way I do</span><span class="ys">2 yr</span><span class="tip"><span class="tip-src">BombBomb · Argus · Hermes</span><span class="tip-fx"><span>Routes each task to the cheapest model tier that can handle it</span><span>Hermes board: 122 tasks, 231 worker runs so far</span><span>330+ subagent delegations, capped in config so none can run away</span><span>No "done" accepted on an agent's word. Something that didn't do the work verifies it</span></span><span class="tip-quote">"A worker reporting done starts verification. It never ends the work."</span></span></div>
+            <div class="item g2" tabindex="0"><span class="yr">LEGENDARY</span><span class="nm">Full-stack TypeScript</span><span class="sb"><i>React</i><i>Next.js</i><i>Node</i><i>antd</i><i>Storybook</i></span><span class="ys">6 yr</span><span class="tip"><span class="tip-src">BombBomb · Olive · Optima · JAPR Tech</span><span class="tip-fx"><span>Component library on shadcn/ui with custom theming</span><span>tRPC caching and batching: -60% API calls</span><span>Next.js SSR tuning: +25% core web vitals</span><span>Storybook visual tests, Jest coverage, memoized hot components</span></span><span class="tip-quote">"A meaningful share of my review comments are about two pixels of drift."</span></span></div>
+            <div class="item g2" tabindex="0"><span class="yr">LEGENDARY</span><span class="nm">Data and APIs</span><span class="sb"><i>MySQL</i><i>PostgreSQL</i><i>TypeORM</i><i>Django REST</i></span><span class="ys">6 yr</span><span class="tip"><span class="tip-src">BombBomb · Olive</span><span class="tip-fx"><span>Django REST APIs with Selenium coverage</span><span>asyncio queue for LLM data ingestion</span><span>Signup state in user-scoped Redis, with a TTL</span><span>Idempotent replays and cache invalidation across hosts</span></span><span class="tip-quote">"The visible symptom is never the whole bug."</span></span></div>
+            <div class="item g1" tabindex="0"><span class="yr">EPIC</span><span class="nm">Parallel environments</span><span class="sb"><i>Docker</i><i>git worktrees</i></span><span class="fl">one isolated env per agent</span><span class="ys">5 yr</span><span class="tip"><span class="tip-src">Day job · agent fleet</span><span class="tip-fx"><span>One command brings up four isolated production-style stacks on one laptop</span><span>Per instance: git worktree, MySQL, local HTTPS hostname, OIDC auth</span><span>One feature ran across 3 worktrees at once: frontend, backend, validation</span><span>Workspace leases granted at dispatch, not found as conflicts later</span></span><span class="tip-quote">"Isolation is a claim. I verified it."</span></span></div>
+            <div class="item g1" tabindex="0"><span class="yr">EPIC</span><span class="nm">Auth and integrations</span><span class="sb"><i>Keycloak</i><i>Auth0</i><i>Stripe</i><i>S3</i></span><span class="ys">5 yr</span><span class="tip"><span class="tip-src">BombBomb · Optima</span><span class="tip-fx"><span>Auth0 trial signup with plan selection at onboarding</span><span>A/B test: 40% of users got a card-free 7-day trial</span><span>Role-based account, team, and user admin: -15% support requests</span><span>Stripe Elements and webhooks: 10k+ transactions a month</span></span><span class="tip-quote">"A gate that has only ever passed is a guess."</span></span></div>
+            <div class="item g1" tabindex="0"><span class="yr">EPIC</span><span class="nm">Pixel-parity QA</span><span class="sb"><i>Storybook</i><i>screenshot loops</i></span><span class="fl">agents chase staging until the diff is zero</span><span class="ys">2 yr</span><span class="tip"><span class="tip-src">Day job · agent fleet</span><span class="tip-fx"><span>Annotated screenshots drive the agent</span><span>Storybook parity stories pin each component</span><span>The diff between branch and staging becomes the work queue</span><span>Checks font weights and hover colors, not just layout</span></span><span class="tip-quote">"The loop ends when the diff does."</span></span></div>
+            <div class="item" tabindex="0"><span class="yr">RARE</span><span class="nm">AI features</span><span class="sb"><i>LangChain</i><i>RAG</i><i>OpenSearch</i></span><span class="ys">3 yr</span><span class="tip"><span class="tip-src">Olive · BombBomb</span><span class="tip-fx"><span>Claude wired into product through LangChain</span><span>RAG pipeline on AWS OpenSearch with vector embeddings</span><span>AI video titles, summaries, and generated campaigns</span><span>Polling handler for async AI requests, no WebSockets needed</span></span></span></div>
+            <div class="item" tabindex="0"><span class="yr">RARE</span><span class="nm">Desktop apps</span><span class="sb"><i>Tauri</i><i>Rust</i></span><span class="fl">signed and notarized</span><span class="ys">1 yr</span><span class="tip"><span class="tip-src">patchdeck · photovault · Side Quests</span><span class="tip-fx"><span>Working Tauri + React app on the first night</span><span>Code-signed, notarized, auto-updating</span><span>Six macOS apps across Swift and Tauri + Rust</span><span>200+ agent sessions spent building them</span></span><span class="tip-quote">"On my dock, running my agents."</span></span></div>
           </div>
           <div class="inv-note">TIER = RARITY · YEARS = EXPERIENCE</div>
         </div>
@@ -860,14 +906,18 @@
       <div class="win">
         <div class="bar"><span>⟨ ARGUS ⟩</span><span class="dot">05 · PRIVATE REPO</span></div>
         <div class="body">
-          <p>Argus holds the coding standards and skills I use with agents every day. The same shared standards feed my Hermes profiles, which add their own rules for autonomous work. Version 5.0 separates those layers so a normal coding session doesn't inherit fleet procedures. The repo is private; here's how it's organized:</p>
+          <p>Argus holds the coding standards and skills I use with agents every day. The same shared standards feed my Hermes profiles, which add their own rules for autonomous work. Since v5.0 those layers stay separate, so a normal coding session doesn't inherit fleet procedures. Version 6 added the warden, a local process that runs a board wave the way I used to by hand. The repo is private; here's how it's organized:</p>
           <ul class="files">
             <li><span class="fn">globals/AGENTS.md</span><span class="fd">shared coding standards, permissions, and verification practices</span></li>
             <li><span class="fn">globals/CLAUDE.md</span><span class="fd">Claude-specific guidance that imports the shared standards</span></li>
-            <li><span class="fn">skills/</span><span class="fd">reusable tools, including unslop for cutting fluff from every response</span></li>
+            <li><span class="fn">skills/</span><span class="fd">22 skills, including unslop for cutting fluff from every response</span></li>
             <li><span class="fn">agent-workflow/</span><span class="fd">Hermes autonomy: cards, workers, reviews, and profile boundaries</span></li>
             <li><span class="fn">repo-skills/</span><span class="fd">project-specific knowledge kept separate from personal defaults</span></li>
-            <li><span class="fn">sync.sh</span><span class="fd">installs each layer where it belongs, backs up changes, and protects local edits</span></li>
+            <li><span class="fn">warden/</span><span class="fd">watches the Hermes board: reruns gates, routes review findings, answers blocked workers, and reports when the wave settles. It never edits product code</span></li>
+            <li><span class="fn">hooks/</span><span class="fd">a fail-closed guard, so a worker can't mark its own card done. Only the review lane can</span></li>
+            <li><span class="fn">cron/</span><span class="fd">scheduled maintenance, like clearing old desktop screenshots</span></li>
+            <li><span class="fn">sync.sh</span><span class="fd">installs each layer where it belongs, refuses to overwrite local edits, and reports drift with --check</span></li>
+            <li><span class="fn">tests/</span><span class="fd">22 test files. A pre-commit gate runs them and blocks any commit without a version bump and changelog entry</span></li>
           </ul>
           <div class="qsec">From the Hermes workflow</div>
           <div class="rules-mini">
@@ -875,7 +925,7 @@
             <p><b>"A worker reporting done starts verification. It never ends the work."</b></p>
             <p><b>"Never present a skipped check as green."</b> Every check reports pass, fail, blocked, or not run.</p>
           </div>
-          <p class="dim" style="font-size: 13px; margin-top: 14px;">Currently at v5.0. Shared standards live in one place; Hermes adds its autonomy rules when they're needed.</p>
+          <p class="dim" style="font-size: 13px; margin-top: 14px;">Currently at v6.10.3. Shared standards live in one place; Hermes adds its autonomy rules when they're needed.</p>
         </div>
       </div>
     </section>
@@ -999,6 +1049,61 @@
   document.querySelectorAll('a[href^="http"]').forEach(a => {
     a.target = '_blank'; a.rel = 'noopener';
   });
+
+  // skill breakdown tooltip: attached to body so panels and scroll areas can't clip it
+  const itemTip = document.createElement('div');
+  itemTip.className = 'item-tip';
+  itemTip.id = 'item-tip';
+  itemTip.setAttribute('role', 'tooltip');
+  document.body.append(itemTip);
+  let tipItem = null;
+  const showItemTip = item => {
+    const yr = item.querySelector('.yr');
+    const head = document.createElement('span');
+    head.className = 'tip-head';
+    head.innerHTML = `<span></span><span class="dim"></span>`;
+    head.children[0].textContent = yr.textContent;
+    head.children[1].textContent = item.querySelector('.ys').textContent.toUpperCase();
+    const name = document.createElement('span');
+    name.className = 'tip-nm';
+    name.textContent = item.querySelector('.nm').textContent;
+    itemTip.className = `item-tip ${[...item.classList].filter(c => /^g\d$/.test(c)).join(' ')}`;
+    itemTip.style.setProperty('--r', getComputedStyle(yr).color);
+    itemTip.replaceChildren(head, name, ...item.querySelector('.tip').cloneNode(true).childNodes);
+    // beside the card when there's room, otherwise below (or above) it
+    const r = item.getBoundingClientRect();
+    const w = itemTip.offsetWidth, h = itemTip.offsetHeight, gap = 10, pad = 8;
+    let left = r.right + gap, top = r.top;
+    if (left + w > innerWidth - pad) left = r.left - gap - w;
+    if (left < pad) {
+      left = Math.min(Math.max(pad, r.left + r.width / 2 - w / 2), innerWidth - w - pad);
+      top = r.bottom + gap;
+      if (top + h > innerHeight - pad) top = r.top - gap - h;
+    }
+    itemTip.style.left = `${left}px`;
+    itemTip.style.top = `${Math.min(Math.max(pad, top), innerHeight - h - pad)}px`;
+    itemTip.classList.add('show');
+    if (tipItem) tipItem.removeAttribute('aria-describedby');
+    item.setAttribute('aria-describedby', 'item-tip');
+    tipItem = item;
+  };
+  const hideItemTip = () => {
+    itemTip.classList.remove('show');
+    if (tipItem) tipItem.removeAttribute('aria-describedby');
+    tipItem = null;
+  };
+  document.querySelectorAll('.item').forEach(item => {
+    if (!item.querySelector('.tip')) return;
+    item.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') showItemTip(item); });
+    item.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') hideItemTip(); });
+    item.addEventListener('focus', () => showItemTip(item));
+    item.addEventListener('blur', hideItemTip);
+    item.addEventListener('click', () => showItemTip(item));
+  });
+  document.addEventListener('pointerdown', e => { if (!e.target.closest('.item')) hideItemTip(); });
+  document.addEventListener('scroll', hideItemTip, true);
+  addEventListener('resize', hideItemTip);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') hideItemTip(); });
 
   // local clock, live
   const clock = document.getElementById('clock');
