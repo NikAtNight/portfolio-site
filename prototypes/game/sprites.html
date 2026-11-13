@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sprite Sheet</title>
+<style>
+  :root {
+    --bg: #0a0e1a; --panel: rgba(13, 22, 41, .9); --line: #1e3a66; --line-bright: #3d6fb8;
+    --text: #c9d6e8; --dim: #6d829e; --sys: #4da3ff; --gold: #d9b45b; --hi: #e8eef7;
+    --mono: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    background-image: radial-gradient(ellipse 70% 40% at 50% -5%, rgba(61,111,184,.12), transparent);
+    color: var(--text); font: 13px/1.6 var(--mono); min-height: 100vh;
+  }
+  a { color: var(--sys); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  button { font: inherit; color: inherit; background: none; border: 1px solid var(--line); padding: 3px 9px; cursor: pointer; letter-spacing: .08em; }
+  button:hover { border-color: var(--line-bright); color: var(--hi); }
+  button[aria-pressed="true"] { border-color: var(--gold); color: var(--gold); background: rgba(217,180,91,.07); }
+
+  /* ---------- header ---------- */
+  header { position: sticky; top: 0; z-index: 10; background: rgba(9, 14, 26, .97); border-bottom: 1px solid var(--line); box-shadow: 0 6px 24px rgba(0,0,0,.4); }
+  .banner { display: flex; gap: 14px; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 6px 16px; border-bottom: 1px solid var(--line); font-size: 11px; letter-spacing: .12em; color: var(--dim); }
+  .banner b { color: var(--gold); font-weight: 600; }
+  .banner nav { display: flex; gap: 14px; }
+  .controls { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; padding: 10px 16px 8px; max-width: 1240px; margin: 0 auto; }
+  .controls h1 { font-size: 13px; font-weight: 400; letter-spacing: .16em; color: var(--sys); margin-right: auto; }
+  .ctl { display: flex; align-items: center; gap: 6px; font-size: 11px; letter-spacing: .1em; color: var(--dim); }
+  .seg { display: flex; }
+  .seg button { border-right-width: 0; padding: 3px 7px; min-width: 28px; }
+  .seg button:last-child { border-right-width: 1px; }
+  .ctl input[type="search"] { width: 150px; background: #0d1729; border: 1px solid var(--line); color: var(--hi); font: inherit; padding: 3px 8px; }
+  .ctl input[type="search"]:focus { outline: none; border-color: var(--line-bright); }
+  .jump { display: flex; gap: 6px; overflow-x: auto; padding: 0 16px 10px; max-width: 1240px; margin: 0 auto; scrollbar-width: thin; }
+  .jump a { flex-shrink: 0; border: 1px solid var(--line); padding: 2px 9px; font-size: 11px; letter-spacing: .06em; color: var(--text); white-space: nowrap; }
+  .jump a:hover { border-color: var(--gold); color: var(--gold); text-decoration: none; }
+  .jump a span { color: var(--dim); margin-left: 4px; }
+
+  main { max-width: 1240px; margin: 0 auto; padding: 22px 16px 80px; }
+  .sources { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-bottom: 18px; font-size: 11px; letter-spacing: .06em; color: var(--dim); }
+  .sources .ok { color: var(--sys); } .sources .miss { color: #8a6f3a; } .sources .err { color: #ff6b7d; }
+
+  /* ---------- system windows ---------- */
+  .win { position: relative; background: var(--panel); border: 1px solid var(--line); box-shadow: 0 0 24px rgba(77,163,255,.1); margin-bottom: 24px; scroll-margin-top: 140px; }
+  .win::before { content: ''; position: absolute; top: -1px; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, #00a8ff, transparent); }
+  .win > .bar { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; padding: 8px 16px; border-bottom: 1px solid var(--line); color: var(--sys); font-size: 12px; letter-spacing: .14em; }
+  .win > .bar .dot { color: var(--line-bright); display: flex; gap: 10px; align-items: center; }
+  .win > .bar button { font-size: 10.5px; padding: 2px 8px; color: var(--gold); border-color: #5a4a24; }
+  .win > .body { padding: 16px; }
+
+  .look { display: flex; flex-direction: column; gap: 10px; }
+  .look .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .look .k { width: 110px; color: var(--dim); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; }
+  .look .opts { display: flex; gap: 6px; flex-wrap: wrap; }
+  .look .sw { width: 26px; height: 22px; padding: 0; border: 2px solid var(--line); }
+  .look .sw[aria-pressed="true"] { border-color: var(--gold); box-shadow: 0 0 0 1px var(--bg) inset; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 14px; }
+  .item { border: 1px solid var(--line); background: #080d19; display: flex; flex-direction: column; min-width: 0; }
+  .item.wide { grid-column: 1 / -1; }
+  .item .head { display: flex; justify-content: space-between; gap: 10px; padding: 7px 10px; border-bottom: 1px dashed var(--line); }
+  .item .nm { color: var(--hi); font-weight: 600; font-size: 12.5px; }
+  .item .meta { color: var(--dim); font-size: 11px; white-space: nowrap; }
+  .item .note { padding: 6px 10px 0; color: var(--dim); font-size: 11px; line-height: 1.5; }
+  .stage { display: flex; align-items: center; justify-content: center; padding: 14px; min-height: 90px; }
+  .strip { overflow-x: auto; padding: 4px 10px 12px; border-top: 1px solid rgba(30,58,102,.5); }
+  .strip-label { padding: 6px 10px 0; color: var(--dim); font-size: 10px; letter-spacing: .14em; }
+  canvas { image-rendering: pixelated; image-rendering: crisp-edges; display: block; }
+
+  /* preview backgrounds */
+  .bg-dark .stage, .bg-dark .strip canvas { background-color: #05080f; }
+  .bg-light .stage, .bg-light .strip canvas { background-color: #d8dee9; }
+  .bg-checker .stage, .bg-checker .strip canvas {
+    background-color: #1a2236;
+    background-image: linear-gradient(45deg, #232d45 25%, transparent 25%), linear-gradient(-45deg, #232d45 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #232d45 75%), linear-gradient(-45deg, transparent 75%, #232d45 75%);
+    background-size: 16px 16px; background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+  }
+  .empty { color: var(--dim); padding: 30px 0; text-align: center; }
+
+  @media (max-width: 600px) {
+    header { position: static; }
+    .banner > span { display: none; }
+    .controls { gap: 8px 10px; }
+    .controls h1 { width: 100%; }
+    .ctl input[type="search"] { width: 120px; }
+    .seg button { min-width: 0; padding: 3px 6px; }
+    .look .k { width: 100%; }
+    main { padding-top: 16px; }
+  }
+</style>
+</head>
+<body class="bg-dark">
+<header>
+  <div class="banner"><span><b>PROTOTYPE</b> · sprite sheet, everything the game draws</span>
+    <nav><a href="index.html">Site demo</a><a href="overworld.html">Overworld</a></nav></div>
+  <div class="controls">
+    <h1>⟨ SPRITE SHEET ⟩</h1>
+    <div class="ctl">ZOOM <div class="seg" id="zoom"></div></div>
+    <div class="ctl"><button type="button" id="play" aria-pressed="true">❚❚ PAUSE</button></div>
+    <div class="ctl">BG <div class="seg" id="bg"></div></div>
+    <div class="ctl"><input type="search" id="filter" placeholder="filter sprites" aria-label="Filter sprites"></div>
+    <div class="ctl"><button type="button" id="dl-all">⤓ DOWNLOAD ALL</button></div>
+  </div>
+  <nav class="jump" id="jump" aria-label="Jump to group"></nav>
+</header>
+<main>
+  <div class="sources" id="sources"></div>
+  <div id="look-slot"></div>
+  <div id="groups"><p class="empty">Loading sprites…</p></div>
+</main>
+
+<script>
+// PROTOTYPE sprite-sheet viewer. Each source script runs in its own hidden iframe so their
+// top-level names (R, W, T…) can't collide, then this page reads each frame's SpriteSheet.
+const CONTRACT = `window.SpriteSheet = window.SpriteSheet || { groups: [], add(group, name, frames, opts = {}) {
+  let g = this.groups.find(x => x.name === group); if (!g) this.groups.push(g = { name: group, items: [] });
+  const i = g.items.findIndex(x => x.name === name), item = { name, frames, fps: opts.fps || 6, note: opts.note || '' };
+  i >= 0 ? (g.items[i] = item) : g.items.push(item);
+} };`;
+const SOURCES = [
+  // the overworld file borrows the runtime's globals for its animated captures
+  { file: 'overworld-sprites.js', pre: 'window.SPRITE_GALLERY = true; var b, buf, time = 0, player = { x: 0, y: 0 }, discovered = new Set();' },
+  { file: 'raid-sprites.js', pre: '' },
+  { file: 'characters.js', pre: '' },
+  { file: "characters-astra.js", pre: "" },
+  // boss alternatives: 9 bosses x 5 concepts per designer, split into three files each
+  ...[1, 2, 3].flatMap(n => [{ file: `bosses-alt-claude-${n}.js`, pre: "" }, { file: `bosses-alt-astra-${n}.js`, pre: "" }]),
+];
+const $ = s => document.querySelector(s);
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const store = { get(k, d) { try { const v = localStorage.getItem('sprites-' + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem('sprites-' + k, JSON.stringify(v)); } catch {} } };
+
+const state = { zoom: store.get('zoom', 4), play: true, bg: store.get('bg', 'dark'), filter: '' };
+const loaded = []; // { src, win, groups }
+
+// ---------- load sources ----------
+function loadSource(src) {
+  return new Promise(resolve => {
+    const f = document.createElement('iframe');
+    f.hidden = true; f.title = src.file;
+    f.srcdoc = `<!doctype html><meta charset="utf-8"><script>${src.pre}\n${CONTRACT}\nwindow.__errors = []; addEventListener('error', e => __errors.push(e.message || 'script error'));<\/script>`
+      + `<script src="${src.file}" onerror="window.__missing = true"><\/script>`;
+    const done = status => resolve({ src, status, win: f.contentWindow });
+    const timer = setTimeout(() => done({ kind: 'err', text: 'timed out' }), 15000);
+    f.onload = () => {
+      clearTimeout(timer);
+      let w; try { w = f.contentWindow; w.document; } catch { return done({ kind: 'err', text: 'blocked (open from the same folder)' }); }
+      if (w.__missing) return done({ kind: 'miss', text: 'not loaded yet' });
+      const groups = w.SpriteSheet?.groups || [];
+      if (w.__errors.length && !groups.length) return done({ kind: 'err', text: w.__errors[0] });
+      done({ kind: 'ok', text: `${groups.length} group${groups.length === 1 ? '' : 's'}${w.__errors.length ? ' · ' + w.__errors.length + ' error' : ''}` });
+    };
+    document.body.append(f);
+  });
+}
+
+// ---------- controls ----------
+function segmented(host, values, current, label, onPick) {
+  host.replaceChildren(...values.map(v => {
+    const btn = el('button', '', label(v)); btn.type = 'button';
+    btn.setAttribute('aria-pressed', String(v === current));
+    btn.onclick = () => { host.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === btn))); onPick(v); };
+    return btn;
+  }));
+}
+segmented($('#zoom'), [1, 2, 3, 4, 5, 6, 7, 8], state.zoom, v => v + 'x', v => { state.zoom = v; store.set('zoom', v); render(); });
+segmented($('#bg'), ['dark', 'checker', 'light'], state.bg, v => v.toUpperCase(), v => { state.bg = v; store.set('bg', v); applyBg(); });
+const applyBg = () => { document.body.classList.remove('bg-dark', 'bg-checker', 'bg-light'); document.body.classList.add('bg-' + state.bg); };
+applyBg();
+$('#play').onclick = e => { state.play = !state.play; e.currentTarget.setAttribute('aria-pressed', String(state.play)); e.currentTarget.textContent = state.play ? '❚❚ PAUSE' : '▶ PLAY'; };
+let resizeT; addEventListener("resize", () => { clearTimeout(resizeT); resizeT = setTimeout(render, 200); });
+let filterT; $('#filter').oninput = e => { clearTimeout(filterT); filterT = setTimeout(() => { state.filter = e.target.value.trim().toLowerCase(); render(); }, 120); };
+
+// ---------- rendering ----------
+const allGroups = () => loaded.flatMap(l => (l.win.SpriteSheet?.groups || []).map(g => ({ ...g, source: l.src.file })));
+const slug = s => 'g-' + s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const dims = frames => frames.reduce((d, f) => ({ w: Math.max(d.w, f.width), h: Math.max(d.h, f.height) }), { w: 0, h: 0 });
+// integer zoom, capped so large sprites (buildings) still fit their card
+const fitZoom = (w, h, max) => Math.max(1, Math.min(state.zoom, Math.floor(max / Math.max(w, h)) || 1));
+let previews = [];
+
+function render() {
+  const groups = allGroups();
+  const host = $('#groups');
+  previews = [];
+  const jump = $('#jump'); jump.replaceChildren();
+  if (!groups.length) { host.replaceChildren(el('p', 'empty', 'No sprites registered yet.')); return; }
+  const frag = document.createDocumentFragment();
+  groups.forEach(g => {
+    const items = g.items.filter(it => !state.filter || (g.name + ' ' + it.name + ' ' + it.note).toLowerCase().includes(state.filter));
+    if (!items.length) return;
+    const a = el('a'); a.href = '#' + slug(g.name); a.textContent = g.name; a.append(el('span', '', items.length)); jump.append(a);
+    const win = el('section', 'win'); win.id = slug(g.name);
+    const bar = el('div', 'bar'); bar.append(el('span', '', `⟨ ${g.name.toUpperCase()} ⟩`));
+    const dot = el('span', 'dot', `${items.length} SPRITES · ${items.reduce((n, it) => n + it.frames.length, 0)} FRAMES`);
+    const dl = el('button', '', '⤓ PNG'); dl.type = 'button'; dl.title = 'Download this group as one PNG sheet';
+    dl.onclick = () => download(sheetFor([{ ...g, items }]), g.name);
+    dot.append(dl); bar.append(dot); win.append(bar);
+    const body = el('div', 'body'), grid = el('div', 'grid');
+    items.forEach(it => grid.append(card(it)));
+    body.append(grid); win.append(body); frag.append(win);
+  });
+  host.replaceChildren(frag);
+  if (!host.children.length) host.append(el('p', 'empty', `Nothing matches "${state.filter}".`));
+}
+
+function card(it) {
+  const { w, h } = dims(it.frames), n = it.frames.length;
+  // big sprites (buildings, bubbles) get a full-row card so they can stay at a readable zoom
+  const wide = w * Math.min(state.zoom, 4) > 330 || h * Math.min(state.zoom, 4) > 420;
+  const z = fitZoom(w, h, Math.min(wide ? 640 : 330, innerWidth - 90));
+  const c = el("article", "item");
+  if (wide) c.classList.add("wide");
+  const head = el('div', 'head');
+  head.append(el('span', 'nm', it.name), el('span', 'meta', `${w}×${h} · ${n} fr${n > 1 ? ' · ' + it.fps + ' fps' : ''}${z !== state.zoom ? ' · ' + z + 'x' : ''}`));
+  c.append(head);
+  if (it.note) c.append(el('div', 'note', it.note));
+  const stage = el('div', 'stage'), pv = document.createElement('canvas');
+  pv.width = w * z; pv.height = h * z; pv.setAttribute('role', 'img'); pv.setAttribute('aria-label', `${it.name}, animated preview`);
+  stage.append(pv); c.append(stage);
+  previews.push({ cv: pv, it, z, w, h, last: -1 });
+  drawFrame(previews[previews.length - 1], 0);
+  c.append(el("div", "strip-label", `SHEET · ${n} FRAME${n > 1 ? "S" : ""}`));
+  // the sheet strip drops zoom until the whole row fits the card, so every frame is visible at once
+  const total = it.frames.reduce((s, f) => s + f.width + 2, 0), room = c.classList.contains("wide") ? Math.min(1100, innerWidth - 90) : Math.min(340, innerWidth - 90);
+  const sz = Math.max(1, Math.min(z, Math.floor(room / total)));
+  const strip = el("div", "strip"); strip.append(stripCanvas(it.frames, sz)); c.append(strip);
+  return c;
+}
+
+function drawFrame(p, i) {
+  const g = p.cv.getContext('2d'), f = p.it.frames[i];
+  g.imageSmoothingEnabled = false; g.clearRect(0, 0, p.cv.width, p.cv.height);
+  // bottom-centre so walk cycles and buildings stay planted
+  const x = Math.floor((p.w - f.width) / 2) * p.z, y = (p.h - f.height) * p.z;
+  g.drawImage(f, x, y, f.width * p.z, f.height * p.z);
+}
+
+// classic sheet strip: frames side by side, index above each, native size noted on hover
+function stripCanvas(frames, z) {
+  const gap = 6, top = 14, dpr = Math.ceil(window.devicePixelRatio || 1);
+  const width = frames.reduce((s, f) => s + f.width * z + gap, gap), height = top + Math.max(...frames.map(f => f.height)) * z + gap;
+  const c = document.createElement('canvas'); c.width = width * dpr; c.height = height * dpr; c.style.width = width + 'px'; c.style.height = height + 'px';
+  const g = c.getContext('2d'); g.scale(dpr, dpr); g.imageSmoothingEnabled = false;
+  g.font = '10px ui-monospace, Menlo, monospace'; g.textBaseline = 'top';
+  let x = gap;
+  frames.forEach((f, i) => {
+    g.fillStyle = '#6d829e'; g.fillText(String(i), x, 1);
+    g.strokeStyle = 'rgba(61,111,184,.45)'; g.strokeRect(x - 0.5, top - 0.5, f.width * z + 1, f.height * z + 1);
+    g.drawImage(f, x, top, f.width * z, f.height * z);
+    x += f.width * z + gap;
+  });
+  c.title = frames.map((f, i) => `#${i} ${f.width}×${f.height}`).join('  ');
+  return c;
+}
+
+// one animation clock for every preview on the page
+const t0 = performance.now(); let pausedAt = 0, offset = 0;
+function tick(now) {
+  if (!state.play) { if (!pausedAt) pausedAt = now; }
+  else { if (pausedAt) { offset += now - pausedAt; pausedAt = 0; }
+    const t = now - t0 - offset;
+    previews.forEach(p => { const n = p.it.frames.length; if (n < 2) return; const i = Math.floor(t / 1000 * p.it.fps) % n; if (i !== p.last) { p.last = i; drawFrame(p, i); } });
+  }
+  requestAnimationFrame(tick);
+}
+
+// ---------- PNG export: native resolution, labelled rows ----------
+function sheetFor(groups) {
+  const pad = 4, label = 12, ghead = 16;
+  let width = 240, height = pad;
+  groups.forEach(g => { height += ghead; g.items.forEach(it => { const { h } = dims(it.frames); width = Math.max(width, pad + it.frames.reduce((s, f) => s + f.width + pad, 0)); height += label + h + pad; }); height += pad; });
+  const c = document.createElement('canvas'); c.width = width; c.height = height;
+  const g = c.getContext('2d'); g.imageSmoothingEnabled = false;
+  g.fillStyle = '#0a0e1a'; g.fillRect(0, 0, width, height);
+  g.font = '9px ui-monospace, Menlo, monospace'; g.textBaseline = 'top';
+  let y = pad;
+  groups.forEach(gr => {
+    g.fillStyle = '#4da3ff'; g.fillText(gr.name.toUpperCase(), pad, y + 3); g.fillStyle = '#1e3a66'; g.fillRect(pad, y + 13, width - pad * 2, 1); y += ghead;
+    gr.items.forEach(it => {
+      const { h } = dims(it.frames);
+      g.fillStyle = '#d9b45b'; g.fillText(`${it.name}  (${it.frames.length > 1 ? it.frames.length + " fr @ " + it.fps + " fps" : "1 fr"})`, pad, y + 1); y += label;
+      let x = pad; it.frames.forEach(f => { g.drawImage(f, x, y + h - f.height); x += f.width + pad; });
+      y += h + pad;
+    });
+    y += pad;
+  });
+  return c;
+}
+function download(canvas, name) {
+  canvas.toBlob(blob => {
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.png'; document.body.append(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }, 'image/png');
+}
+$('#dl-all').onclick = () => download(sheetFor(allGroups()), 'portfolio-sprite-atlas');
+
+// ---------- "Your look" (only when characters.js exposes the builder) ----------
+function normaliseOptions(raw) {
+  const opt = v => typeof v === 'object' && v ? { value: v.value ?? v.id ?? v.label, label: v.label ?? String(v.value ?? v.id), color: v.color || v.swatch || (/^#[0-9a-f]{3,8}$/i.test(String(v.value)) ? v.value : null) }
+    : { value: v, label: String(v), color: /^#[0-9a-f]{3,8}$/i.test(String(v)) ? v : null };
+  if (Array.isArray(raw)) return raw.map(r => ({ key: r.key ?? r.id, label: r.label ?? r.key ?? r.id, options: (r.options || r.values || []).map(opt) }));
+  return Object.entries(raw).map(([key, v]) => ({ key, label: (v && v.label) || key, options: (Array.isArray(v) ? v : v.options || v.values || []).map(opt) }));
+}
+// one panel drives every character source (Claude and GPT sets share option ids)
+const lookWins = []; let currentLook = null;
+function setupLook(l) {
+  const w = l.win;
+  if (typeof w.buildCharacters !== "function" || !w.CHARACTER_LOOK_OPTIONS) return;
+  lookWins.push(w);
+  if (currentLook) { try { w.buildCharacters({ ...currentLook }); } catch (e) { console.warn("buildCharacters failed", e); } return; }
+  let opts; try { opts = normaliseOptions(w.CHARACTER_LOOK_OPTIONS).filter(o => o.key != null && o.options.length); } catch { return; }
+  if (!opts.length) return;
+  const saved = store.get("look", {}), look = currentLook = {};
+  opts.forEach(o => { look[o.key] = o.options.some(x => x.value === saved[o.key]) ? saved[o.key] : o.options[0].value; });
+  const rebuild = () => {
+    lookWins.forEach(x => { try { x.buildCharacters({ ...look }); } catch (e) { console.warn("buildCharacters failed", e); } });
+    store.set('look', look); render();
+  };
+  const win = el('section', 'win'), bar = el('div', 'bar');
+  bar.append(el('span', '', '⟨ YOUR LOOK ⟩'), el('span', 'dot', 'CHARACTERS REBUILD LIVE'));
+  const body = el('div', 'body look');
+  opts.forEach(o => {
+    const row = el('div', 'row'); row.append(el('span', 'k', o.label));
+    const box = el('div', 'opts');
+    o.options.forEach(x => {
+      const b = el('button', x.color ? 'sw' : '', x.color ? '' : x.label); b.type = 'button';
+      if (x.color) { b.style.background = x.color; b.title = x.label; b.setAttribute('aria-label', `${o.label}: ${x.label}`); }
+      b.setAttribute('aria-pressed', String(look[o.key] === x.value));
+      b.onclick = () => { look[o.key] = x.value; box.querySelectorAll('button').forEach(y => y.setAttribute('aria-pressed', String(y === b))); rebuild(); };
+      box.append(b);
+    });
+    row.append(box); body.append(row);
+  });
+  win.append(bar, body); $('#look-slot').replaceChildren(win);
+  if (Object.keys(saved).length) try { w.buildCharacters({ ...look }); } catch (e) { console.warn('buildCharacters failed', e); }
+}
+
+// ---------- boot: sources load one after another, in order ----------
+(async () => {
+  const status = $('#sources');
+  for (const src of SOURCES) {
+    const r = await loadSource(src);
+    const s = el('span', r.status.kind, `${r.status.kind === 'ok' ? '✓' : r.status.kind === 'miss' ? '·' : '✕'} ${src.file} · ${r.status.text}`);
+    status.append(s);
+    if (r.status.kind === 'ok') { loaded.push(r); if (src.file.startsWith("characters")) setupLook(r); }
+  }
+  render();
+  requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>

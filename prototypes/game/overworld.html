@@ -1,0 +1,544 @@
+<!doctype html>
+<!-- PROTOTYPE: overworld mock (idea #6). Throwaway. Not deployed, not for production. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Overworld Mock</title>
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --panel: rgba(13, 22, 41, .96);
+    --line: #1e3a66;
+    --line-bright: #3d6fb8;
+    --glow: rgba(77, 163, 255, .14);
+    --text: #c9d6e8;
+    --dim: #6d829e;
+    --sys: #4da3ff;
+    --gold: #d9b45b;
+    --myth: #e0823d;
+    --mono: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--bg); color: var(--text);
+    font: 14px/1.55 var(--mono);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  a { color: var(--sys); }
+  .gold { color: var(--gold); } .dim { color: var(--dim); } .sys { color: var(--sys); } .myth { color: var(--myth); }
+  .banner {
+    display: flex; gap: 8px 16px; align-items: center; justify-content: space-between; flex-wrap: wrap;
+    padding: 8px 16px; border-bottom: 1px solid var(--line); background: #0d1629;
+    font-size: 12px; letter-spacing: .04em;
+  }
+  .banner b { color: var(--gold); font-weight: 600; }
+  .banner nav { display: flex; gap: 16px; }
+  .banner a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  #stage { position: relative; flex: 1; min-height: 0; }
+  #view { display: block; width: 100%; height: 100%; touch-action: none; cursor: pointer; outline: none; }
+
+  .win {
+    background: var(--panel); border: 1px solid var(--line-bright);
+    box-shadow: 0 0 0 1px var(--glow), 0 0 24px var(--glow);
+  }
+  .win .bar {
+    display: flex; justify-content: space-between; gap: 12px; padding: 6px 12px;
+    border-bottom: 1px solid var(--line); color: var(--sys); font-size: 12px; letter-spacing: .08em;
+  }
+  .win .bar .dot { color: var(--dim); }
+  .win .body { padding: 12px 16px; }
+
+  .hud { position: absolute; top: 12px; left: 12px; font-size: 12px; pointer-events: none; }
+  .hud .body { padding: 6px 12px; }
+  .help { position: absolute; left: 12px; bottom: 12px; font-size: 11px; color: var(--dim); pointer-events: none; max-width: 60%; }
+  #minimap {
+    position: absolute; right: 12px; bottom: 12px; width: 176px; height: 128px;
+    image-rendering: pixelated; border: 1px solid var(--line-bright); background: var(--bg);
+    box-shadow: 0 0 16px var(--glow);
+  }
+  #prompt {
+    position: absolute; left: 50%; bottom: 56px; transform: translateX(-50%);
+    font: 12px var(--mono); letter-spacing: .06em; color: var(--gold);
+    background: var(--panel); border: 1px solid var(--gold); padding: 6px 14px; cursor: pointer;
+    animation: bob 1.4s ease-in-out infinite;
+  }
+  @media (hover: hover) and (pointer: fine) { #prompt { display: none; } }
+  @keyframes bob { 50% { transform: translate(-50%, -3px); } }
+  #toast {
+    position: absolute; top: 14px; left: 50%; transform: translate(-50%, -8px); opacity: 0;
+    transition: opacity .25s, transform .25s; pointer-events: none; font-size: 12px; color: var(--gold);
+  }
+  #toast.show { opacity: 1; transform: translate(-50%, 0); }
+  #toast .body { padding: 6px 14px; }
+
+  #overlay {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: rgba(5, 8, 16, .6); padding: 16px;
+  }
+  #overlay[hidden], #prompt[hidden], #text-view[hidden], #stage[hidden] { display: none; }
+  #panel { width: min(600px, 100%); max-height: 100%; display: flex; flex-direction: column; }
+  #panel .body { overflow: auto; }
+  #panel .close {
+    background: none; border: 0; color: var(--dim); font: 12px var(--mono); cursor: pointer; padding: 0;
+  }
+  #panel .close:hover { color: var(--gold); }
+
+  .name { font-size: 18px; margin-bottom: 8px; }
+  .meter-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--dim); }
+  .meter { height: 8px; border: 1px solid var(--line-bright); margin: 4px 0 12px; }
+  .meter i { display: block; height: 100%; background: linear-gradient(90deg, var(--line-bright), var(--sys)); }
+  table.kv { border-collapse: collapse; width: 100%; font-size: 13px; }
+  table.kv td { padding: 3px 0; vertical-align: top; }
+  table.kv td:first-child { color: var(--dim); width: 90px; }
+  .small { font-size: 12px; }
+  .entry { padding: 8px 0; border-bottom: 1px dashed var(--line); }
+  .entry:last-child { border-bottom: 0; }
+  .entry .tag { color: var(--gold); font-size: 11px; letter-spacing: .06em; }
+  .entry h4 { margin: 2px 0; font-size: 14px; color: var(--text); }
+  .entry p { margin: 2px 0; font-size: 13px; color: var(--dim); }
+  .entry p b { color: var(--text); font-weight: 600; }
+  .body p { margin: 0 0 10px; }
+  blockquote { margin: 8px 0; padding-left: 10px; border-left: 2px solid var(--gold); color: var(--text); }
+
+  #text-view { flex: 1; overflow: auto; padding: 16px; }
+  #text-view .win { max-width: 760px; margin: 0 auto 16px; }
+  #text-view h1 { max-width: 760px; margin: 0 auto 16px; font-size: 16px; color: var(--sys); letter-spacing: .08em; }
+
+  @media (max-width: 640px) {
+    .help { display: none; }
+    #minimap { width: 132px; height: 96px; }
+    #toast { top: 60px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="banner">
+  <span><b>PROTOTYPE</b> · overworld mock, not for production</span>
+  <nav>
+    <a href="#text-view" id="skip">Skip to text view</a>
+    <a href="./index.html">Back to the site demo</a>
+  </nav>
+</header>
+
+<div id="stage">
+  <canvas id="view" tabindex="0" aria-label="Overworld map. Use arrow keys or WASD to move, E to enter a building. A text view is available from the banner."></canvas>
+  <div class="hud win"><div class="body">⟨ OVERWORLD ⟩ ZONES <b class="gold" id="zones">0</b>/8</div></div>
+  <div class="help">WASD / arrows to move · E, Enter or Space to enter · tap a building to walk there</div>
+  <canvas id="minimap" width="88" height="64" aria-hidden="true"></canvas>
+  <button id="prompt" type="button" hidden></button>
+  <div id="toast" class="win" role="status" aria-live="polite"><div class="body"></div></div>
+  <div id="overlay" hidden>
+    <div id="panel" class="win" role="dialog" aria-modal="true" aria-labelledby="panel-title">
+      <div class="bar"><span id="panel-title"></span><span><span class="dot" id="panel-sub"></span> · <button class="close" id="panel-close" type="button">ESC ✕</button></span></div>
+      <div class="body" id="panel-body"></div>
+    </div>
+  </div>
+</div>
+
+<main id="text-view" hidden>
+  <h1>⟨ TEXT VIEW ⟩ <a href="#" id="back-to-map" class="small">Back to map</a></h1>
+  <div id="text-sections"></div>
+</main>
+
+<script src="overworld-sprites.js"></script>
+<script>
+// ---------- Content (condensed from index.html). Zone layout and art live in overworld-sprites.js. ----------
+const ZONE_HTML = {
+  'status': `
+    <div class="name"><span class="gold">[NaN]</span> Nikhil Kapadia</div>
+    <div class="meter-label"><span>Exp: agent sessions orchestrated</span><span class="gold">2,610 / ∞</span></div>
+    <div class="meter"><i style="width:86%"></i></div>
+    <table class="kv">
+      <tr><td>Level</td><td>29</td></tr>
+      <tr><td>Class</td><td>Senior Software Engineer <span class="dim">(base)</span> · <span class="gold">Agent Orchestrator</span> <span class="dim">(class change, 2026)</span></td></tr>
+      <tr><td>Guild</td><td>Talix</td></tr>
+      <tr><td>Specialty</td><td>Full-stack product engineering</td></tr>
+      <tr><td>Passive</td><td><em>Systemize (Lv. MAX)</em>: anything repetitive gets pulled into a system.</td></tr>
+    </table>
+    <p class="small dim" style="margin-top:10px">Skills: <b class="myth">Mythic</b> agent orchestration · <b class="gold">Legendary</b> full-stack TypeScript, data and APIs · <b class="sys">Epic</b> parallel environments, auth and integrations, pixel-parity QA · Rare AI features, desktop apps.</p>`,
+  'about': `
+    <p>I'm Nikhil, a senior software engineer in Toronto. I've spent eight years shipping full-stack product: React and TypeScript up front, Python, Node and PHP behind it. On the side I run Talix, where I build Talix Billing and the tools under Side Quests.</p>
+    <p>The through-line is how I handle repetition. Anything that keeps costing me attention gets pulled out of my hands and into a system: a watcher, a cron job, an agent with written rules.</p>
+    <p>I ship features tests first, then the code that makes them pass. A meaningful share of my review comments are about two pixels of drift.</p>
+    <p class="dim">Off duty I read a lot of Korean webcomics, which you may have guessed from the interface you're using.</p>`,
+  'career': `
+    <div class="entry"><span class="tag">DEC 2024 · PRESENT</span><h4>Senior Software Engineer · BombBomb</h4><p>Took a video-messaging product from a new React shell to a full second-generation app. Around <b>410 merged PRs</b> and 500+ tickets.</p></div>
+    <div class="entry"><span class="tag">JUN 2022 · OCT 2024 · ▲ PROMOTED</span><h4>Senior Frontend → Senior Full-Stack Engineer · Olive</h4><p>Feature-flag UI and permissions, then Django REST APIs, Claude via LangChain, and a <b>RAG pipeline on AWS OpenSearch</b>.</p></div>
+    <div class="entry"><span class="tag">JAN 2022 · OCT 2023</span><h4>Frontend Engineer · Optima Holdings</h4><p>A live trading platform. tRPC caching cut API calls by <b>60%</b>, SSR tuning lifted core web vitals by <b>25%</b>.</p></div>
+    <div class="entry"><span class="tag">APR 2021 · FEB 2022 · ▲ PROMOTED</span><h4>React Developer → Developer / Technical Analyst · JAPR Tech</h4><p>Promoted into running the queue. Completed story volume rose <b>16%</b>.</p></div>
+    <div class="entry"><span class="tag">SEP 2019 · DEC 2019</span><h4>Junior Full-Stack Software Developer · Emailgistics</h4><p>Go microservices, a Vue.js UI, and a load-testing app.</p></div>
+    <div class="entry"><span class="tag">JAN 2019 · APR 2019</span><h4>Analytics Engineer Co-op · RBC</h4><p>The tutorial level. Python tools for the investment team.</p></div>`,
+  'side-quests': `
+    <div class="entry"><h4><a href="https://clips.talix.app">clipshare</a></h4><p>Private video sharing from the macOS menu bar.</p></div>
+    <div class="entry"><h4><a href="https://conductor.talix.app">conductor</a></h4><p>Hand-gesture mouse control for macOS, all on-device.</p></div>
+    <div class="entry"><h4><a href="https://github.com/NikAtNight/file-cleanup">file cleanup</a></h4><p>Scheduled file cleanup for macOS.</p></div>
+    <div class="entry"><h4><a href="https://flo.talix.app">flo</a></h4><p>Fully local push-to-talk dictation for Apple Silicon.</p></div>
+    <div class="entry"><h4><a href="https://kleio.talix.app">kleio</a></h4><p>Meeting recorder for macOS. No bots in the call, no uploads.</p></div>
+    <div class="entry"><h4><a href="https://patchdeck.talix.app">patchdeck</a></h4><p>Local-first workbench for reviewing Git branches and coordinating agent tasks.</p></div>
+    <div class="entry"><h4><a href="https://github.com/NikAtNight/photovault">photovault</a></h4><p>Encrypted local photo and video library. Tauri + Rust.</p></div>
+    <div class="entry"><h4><a href="https://github.com/NikAtNight/pi-extensions">pi-extensions</a></h4><p>Extensions for the pi coding agent: review swarms, browser probe, scope guard.</p></div>
+    <div class="entry"><h4><a href="https://pulsedeck.talix.app">pulsedeck</a></h4><p>Menu bar monitor for CPU, memory, ports, and running coding agents.</p></div>
+    <div class="entry"><h4><a href="https://stubs.talix.app">stubs</a></h4><p>Share .env values through encrypted links that open once.</p></div>`,
+  'premise': `
+    <p>The economics of software engineering changed in the span of about two years. Agents now write competent code. I skipped the argument about what that means. Agents take the repetitive work, and that's fine by me.</p>
+    <p>I moved to the layer the new economics actually reward: orchestration, verification, and the systems that make agent output trustworthy. Work arrives as tasks on a board, each routed to the cheapest model tier that can handle it, and no result is accepted on the agent's word.</p>
+    <p class="gold">The models are commodities. The system around them is the durable advantage.</p>`,
+  'argus': `
+    <p>Argus holds the coding standards and skills I use with agents every day. The same standards feed my Hermes profiles, which add their own rules for autonomous work.</p>
+    <table class="kv">
+      <tr><td>warden/</td><td>runs a board wave the way I used to by hand. Never edits product code.</td></tr>
+      <tr><td>hooks/</td><td>a fail-closed guard, so a worker can't mark its own card done.</td></tr>
+      <tr><td>sync.sh</td><td>installs each layer, refuses to overwrite local edits, reports drift.</td></tr>
+      <tr><td>tests/</td><td>22 test files behind a pre-commit gate.</td></tr>
+    </table>
+    <blockquote>"A gate that has only ever passed is a guess."</blockquote>
+    <p class="dim small">Currently at v6.10.3.</p>`,
+  'raid-log': `
+    <div class="entry"><span class="tag">[INCIDENT]</span><h4>The runaway fleet</h4><p>One review prompt spawned 5 agents, which spawned 928 more. <b>If a safeguard only exists as a sentence, it doesn't exist.</b></p></div>
+    <div class="entry"><span class="tag">[AUDIT]</span><h4>Reviewing the last run</h4><p>2,610 sessions mined. <b>Zero unauthorized commits or pushes</b> across 460 commits and 281 pushes.</p></div>
+    <div class="entry"><span class="tag">[PRODUCTION]</span><h4>The charge that could land before the error</h4><p>128 tests and <b>a regression test that fails when the bug is reintroduced.</b></p></div>
+    <div class="entry"><span class="tag">[RACE]</span><h4>Three branches died before the race did</h4><p>Held in place by <b>a 244-line integration test.</b></p></div>
+    <div class="entry"><span class="tag">[BUG]</span><h4>The one-line fix, three times</h4><p><b>The visible symptom is never the whole bug.</b></p></div>
+    <div class="entry"><span class="tag">[INFRASTRUCTURE]</span><h4>Forking the gateway</h4><p><b>Identical failure sets, zero caused by my diff.</b></p></div>
+    <div class="entry"><span class="tag">[SHIPPED]</span><h4>Patchdeck, idea to signed app</h4><p><b>On my dock, running my agents.</b></p></div>
+    <div class="entry"><span class="tag">[PLATFORM]</span><h4>Four production-like instances, one laptop</h4><p><b>Cloned databases sharing IDs caused cross-instance data bleed.</b></p></div>
+    <div class="entry"><span class="tag">[TECHNIQUE]</span><h4>Pixel parity as an agent loop</h4><p><b>The loop ends when the diff does.</b></p></div>`,
+  'guild': `
+    <p>Talix is the guild. <a href="https://billing.talix.app">Talix Billing</a> is invoicing that gets out of your way. I run it with zero marketing spend.</p>
+    <p class="gold">This paragraph is the marketing.</p>
+    <p class="small"><a href="https://talix.app">talix.app</a> · <a href="https://github.com/NikAtNight">GitHub</a> · <a href="https://www.linkedin.com/in/nikhilkapadia-/">LinkedIn</a></p>`,
+};
+ZONES.forEach(z => { z.html = ZONE_HTML[z.id]; });
+
+// ---------- State ----------
+const player = { x: 19.5 * T, y: 16.8 * T, dir: 'down', moving: false, anim: 0 };
+const keys = new Set();
+const discovered = new Set();
+let path = null, pendingZone = null, stuck = 0, nearZone = null, panelZone = null, time = 0;
+const fireflies = Array.from({ length: 50 }, () => ({ x: rand() * W * T, y: rand() * H * T, vx: 0, vy: 0, ph: rand() * 6.28 }));
+const smoke = [];
+let smokeT = 0;
+const BIRD_HOMES = [[18.2, 12.4], [25.6, 16.7], [24.4, 12.3], [13, 13.4]];
+const birds = BIRD_HOMES.map(([x, y], i) => ({ hx: x * T, hy: y * T, x: x * T, y: y * T, st: 'idle', t: rand() * 2, peck: 0, face: i % 2 ? 1 : -1, vx: 0, vy: 0 }));
+const cat = { x: 24 * T + 6, y: 27 * T + 12, blink: 0, talk: 0 };
+
+// ---------- Canvas setup ----------
+const view = document.getElementById('view'), ctx = view.getContext('2d');
+const buf = document.createElement('canvas'), b = buf.getContext('2d');
+const lightC = document.createElement('canvas'), lg = lightC.getContext('2d');
+const mini = document.getElementById('minimap'), m = mini.getContext('2d');
+const fogPat = b.createPattern(fogTex, 'repeat');
+let scale = 4, dpr = 1;
+const cam = { x: 0, y: 0, ix: 0, iy: 0, init: false };
+function resize() {
+  const r = view.getBoundingClientRect();
+  dpr = window.devicePixelRatio || 1;
+  // about 20x12 tiles on desktop, fewer and taller on phones
+  scale = Math.max(2, Math.floor(Math.min(r.width / 320, r.height / 192)));
+  view.width = Math.round(r.width * dpr); view.height = Math.round(r.height * dpr);
+  buf.width = Math.ceil(r.width / scale); buf.height = Math.ceil(r.height / scale);
+  lightC.width = buf.width; lightC.height = buf.height;
+}
+window.addEventListener('resize', resize);
+
+
+// ---------- Render ----------
+function render() {
+  const bw = buf.width, bh = buf.height;
+  const tx = W * T <= bw ? (W * T - bw) / 2 : Math.max(0, Math.min(W * T - bw, player.x - bw / 2));
+  const ty = H * T <= bh ? (H * T - bh) / 2 : Math.max(0, Math.min(H * T - bh, player.y - 10 - bh / 2));
+  if (!cam.init) { cam.x = tx; cam.y = ty; cam.init = true; }
+  cam.x += (tx - cam.x) * 0.12; cam.y += (ty - cam.y) * 0.12;
+  const cx = Math.round(cam.x), cy = Math.round(cam.y); cam.ix = cx; cam.iy = cy;
+  b.globalCompositeOperation = 'source-over';
+  R(b, 0, 0, bw, bh, '#05080f');
+  b.drawImage(ground, -cx, -cy);
+
+  // animated water
+  const tx0 = Math.max(0, Math.floor(cx / T)), ty0 = Math.max(0, Math.floor(cy / T));
+  const tx1 = Math.min(W - 1, Math.ceil((cx + bw) / T)), ty1 = Math.min(H - 1, Math.ceil((cy + bh) / T));
+  for (let y = ty0; y <= ty1; y++) for (let x = tx0; x <= tx1; x++) {
+    if (map[idx(x, y)] !== WATER) continue;
+    waterAnim(b, x, y, x * T - cx, y * T - cy, time);
+  }
+  // moonlight on the water
+  for (let i = 0; i < 9; i++) {
+    const wy = (LAKE.y - 1.4) * T + i * 5, wx = LAKE.x * T + 20 + Math.round(Math.sin(time * 1.2 + i * 1.7) * 3);
+    const len = 14 - Math.abs(i - 3) * 3; if (len > 0) R(b, wx - len / 2 - cx, wy - cy, len, 1, i % 2 ? 'rgba(191,224,255,.35)' : 'rgba(191,224,255,.22)');
+  }
+  // lily pads
+  [[30, 27], [35, 26], [33, 28]].forEach(([x, y], i) => { const sx = x * T - cx + 4, sy = y * T - cy + 6 + Math.round(Math.sin(time + i) * 0.6); ell(b, sx, sy, 3, 2, '#1d4a3c'); R(b, sx, sy - 2, 1, 2, WA[1]); R(b, sx - 2, sy - 1, 2, 1, '#2f6a52'); if (i === 1) R(b, sx + 1, sy - 2, 2, 2, '#d8a6c8'); });
+
+  // y-sorted sprites
+  const D = [], vis = (x, y, pad = 48) => x > cx - pad && x < cx + bw + pad && y > cy - pad && y < cy + bh + 80;
+  TREES.forEach(t => { if (vis(t.x, t.y)) D.push({ y: t.y, f: () => b.drawImage(t.spr, t.x - 16 - cx, t.y - 39 - cy) }); });
+  LAMPS.forEach(l => { const wx = l.x * T + 1, wy = (l.y + 1) * T - 37; if (vis(wx, wy + 36)) D.push({ y: (l.y + 1) * T - 2, f: () => b.drawImage(lampSprite, wx - cx, wy - cy) }); });
+  ZONES.forEach(z => {
+    D.push({ y: (z.y + z.h) * T, f: () => {
+      b.drawImage(discovered.has(z.id) ? z.art.lit : z.art.dark, z.ox - cx, z.oy - cy);
+      ART[z.kind].anim?.(b, z.ox - cx, z.oy - cy, z);
+    } });
+  });
+  D.push({ y: (FOUNTAIN.y + FOUNTAIN.h) * T - 2, f: () => {
+    const fx = FOUNT_POS.x - cx, fy = FOUNT_POS.y - cy;
+    b.drawImage(fountain, fx, fy);
+    fountainAnim(b, fx, fy, time);
+  } });
+  D.push({ y: cat.y, f: () => drawCat(cat.x - cx, cat.y - cy) });
+  birds.forEach(bd => { if (bd.st === 'idle') D.push({ y: bd.y, f: () => drawBird(bd, bd.x - cx, bd.y - cy) }); });
+  D.push({ y: player.y, f: () => {
+    const sx = Math.round(player.x - cx), sy = Math.round(player.y - cy);
+    ell(b, sx, sy, 5, 2, 'rgba(0,0,0,.45)');
+    const fr = player.moving ? HERO[player.dir].walk[Math.floor(player.anim * 9) % 4] : HERO[player.dir].idle[Math.floor(time * 1.8) % 2];
+    b.drawImage(fr, sx - 9, sy - 25);
+  } });
+  D.sort((a, c) => a.y - c.y).forEach(d => d.f());
+
+  birds.forEach(bd => { if (bd.st === 'fly') drawBird(bd, bd.x - cx, bd.y - cy); });
+  smoke.forEach(p => circ(b, p.x - cx, p.y - cy, Math.round(p.r), `rgba(120,135,165,${p.a * 0.5})`));
+
+  // drifting fog
+  b.save(); b.globalAlpha = 0.55; b.fillStyle = fogPat;
+  const fox = (cx * 0.6 + time * 6) % 192, foy = (cy * 0.6 + time * 2) % 192;
+  b.translate(-fox, -foy); b.fillRect(fox, foy, bw, bh); b.restore();
+
+  // ----- lighting: darkness with cut-outs, then a warm/cool additive glow -----
+  lg.globalCompositeOperation = 'source-over';
+  lg.clearRect(0, 0, bw, bh);
+  lg.fillStyle = 'rgba(4,7,18,.58)'; lg.fillRect(0, 0, bw, bh);
+  const lights = [];
+  const flick = (s) => 0.92 + Math.sin(time * 13 + s) * 0.05 + Math.sin(time * 7.3 + s * 2) * 0.04;
+  LAMPS.forEach((l, i) => lights.push({ x: l.x * T + 8, y: (l.y + 1) * T - 31, r: 46, col: '#ffb85c', a: 0.85 * flick(i) }));
+  ZONES.forEach(z => z.lights.forEach((L, i) => {
+    if (L.kind === 'win' && !discovered.has(z.id)) return;
+    let a = L.a, r = L.r;
+    if (L.kind === 'torch') { a *= flick(i + z.x); r *= flick(i * 3); }
+    if (L.kind === 'crystal') a *= 0.75 + (Math.sin(time * 2.4) + 1) * 0.12;
+    lights.push({ x: z.ox + L.x, y: z.oy + L.y, r, col: L.col, a });
+  }));
+  MUSHROOMS.forEach((mm, i) => lights.push({ x: mm.x, y: mm.y, r: 9, col: '#4da3ff', a: 0.4 + Math.sin(time * 2 + i) * 0.1 }));
+  lights.push({ x: FOUNT_POS.x + 28, y: FOUNT_POS.y + 30, r: 26, col: '#4da3ff', a: 0.35 });
+  lights.push({ x: player.x, y: player.y - 10, r: 50, col: '#a8c8ff', a: 0.55 });
+  fireflies.forEach(f => { const a = (Math.sin(time * 2 + f.ph) + 1) / 2; if (a > 0.5) lights.push({ x: f.x, y: f.y, r: 7, col: '#ffe08a', a: a * 0.5 }); });
+  lg.globalCompositeOperation = 'destination-out';
+  lights.forEach(L => {
+    const x = L.x - cx, y = L.y - cy; if (x < -L.r || y < -L.r || x > bw + L.r || y > bh + L.r) return;
+    const gr = lg.createRadialGradient(x, y, 0, x, y, L.r);
+    gr.addColorStop(0, `rgba(0,0,0,${L.a})`); gr.addColorStop(0.55, `rgba(0,0,0,${L.a * 0.55})`); gr.addColorStop(1, 'rgba(0,0,0,0)');
+    lg.fillStyle = gr; lg.fillRect(x - L.r, y - L.r, L.r * 2, L.r * 2);
+  });
+  b.drawImage(lightC, 0, 0);
+  b.globalCompositeOperation = 'lighter';
+  lights.forEach(L => {
+    const x = L.x - cx, y = L.y - cy; if (x < -L.r || y < -L.r || x > bw + L.r || y > bh + L.r || L.r < 10) return;
+    const [r, g2, bl] = rgb(L.col), gr = b.createRadialGradient(x, y, 0, x, y, L.r * 0.8);
+    gr.addColorStop(0, `rgba(${r},${g2},${bl},${0.16 * L.a})`); gr.addColorStop(1, `rgba(${r},${g2},${bl},0)`);
+    b.fillStyle = gr; b.fillRect(x - L.r, y - L.r, L.r * 2, L.r * 2);
+  });
+  b.globalCompositeOperation = 'source-over';
+
+  fireflies.forEach(f => {
+    const sx = Math.round(f.x - cx), sy = Math.round(f.y - cy);
+    if (sx < -4 || sy < -4 || sx > bw + 4 || sy > bh + 4) return;
+    const a = (Math.sin(time * 2 + f.ph) + 1) / 2; if (a < 0.25) return;
+    R(b, sx, sy, 1, 1, `rgba(255,232,150,${a})`);
+    if (a > 0.7) { R(b, sx - 1, sy, 1, 1, `rgba(255,200,100,${a * 0.4})`); R(b, sx + 1, sy, 1, 1, `rgba(255,200,100,${a * 0.4})`); R(b, sx, sy - 1, 1, 1, `rgba(255,200,100,${a * 0.4})`); R(b, sx, sy + 1, 1, 1, `rgba(255,200,100,${a * 0.4})`); }
+  });
+
+  // ----- labels and prompts, drawn after lighting so they stay crisp -----
+  const labels = [];
+  ZONES.forEach(z => {
+    const found = discovered.has(z.id), lx = z.x * T + z.w * T / 2 - cx, ly = z.oy + z.artTop - 3 - cy;
+    if (lx < -60 || lx > bw + 60 || ly < -10 || ly > bh + 20) return;
+    labels.push([lx, ly, (found ? '* ' : '+ ') + z.name, found ? "found" : nearZone === z ? "near" : "idle"]);
+  });
+  if (cat.talk > 0) bubble(cat.x - cx, cat.y - cy - 16, 'MRRP', null);
+  if (nearZone && !panelZone) bubble(player.x - cx, player.y - cy - 28 + Math.round(Math.sin(time * 4)), 'ENTER ' + nearZone.name, 'E');
+
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(buf, 0, 0, bw * scale * dpr, bh * scale * dpr);
+  // soft vignette on the final image
+  const k = scale * dpr, vg = ctx.createRadialGradient(view.width / 2, view.height / 2, Math.min(view.width, view.height) * 0.35, view.width / 2, view.height / 2, Math.max(view.width, view.height) * 0.75);
+  vg.addColorStop(0, 'rgba(3,5,12,0)'); vg.addColorStop(1, 'rgba(3,5,12,.5)');
+  ctx.fillStyle = vg; ctx.fillRect(0, 0, view.width, view.height);
+  // plaques at half the world scale so they read as signs, not billboards
+  const lk = Math.max(2, Math.round(k / 2)), f = k / lk;
+  ctx.setTransform(lk, 0, 0, lk, 0, 0);
+  labels.forEach(([x, y, s, st]) => plaque(ctx, x * f, y * f, s, st));
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  drawMinimap(cx, cy, bw, bh);
+}
+
+// ---------- Minimap: same palette as the world ----------
+const miniBase = mk(W * 2, H * 2);
+(() => {
+  const g = miniBase.getContext('2d');
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const t = map[idx(x, y)], h = hash(x, y);
+    const col = t === PATH || t === FOUNT ? (h % 2 ? PV[3] : PV[4]) : t === WATER ? (h % 3 ? WA[2] : WA[3]) : t === TREE ? (h % 2 ? '#0a1d1f' : '#12322f') : t === LAMP ? '#ffc964' : t === FENCE ? C.wood[2] : t === ROCK ? C.rock[3] : (h % 4 ? G[1] : G[2]);
+    g.fillStyle = col; g.fillRect(x * 2, y * 2, 2, 2);
+    if (t === TREE && h % 3 === 0) { g.fillStyle = TREE_TONES[3]; g.fillRect(x * 2, y * 2, 1, 1); }
+  }
+})();
+const MINI_ROOF = { house: C.roofN[2], hall: C.stone[4], board: C.wood[3], library: C.roofT[2], watchtower: C.roofN[3], dungeon: C.rock[3], tavern: C.roofP[3], shrine: C.sys[1] };
+function drawMinimap(cx, cy, bw, bh) {
+  m.drawImage(miniBase, 0, 0);
+  ZONES.forEach(z => {
+    const found = discovered.has(z.id);
+    m.fillStyle = found ? MINI_ROOF[z.kind] : '#2a3350'; m.fillRect(z.x * 2, z.y * 2, z.w * 2, z.h * 2);
+    m.fillStyle = found ? C.gold[1] : '#46527a'; m.fillRect(z.x * 2, z.y * 2, z.w * 2, 1);
+    m.fillStyle = found ? C.gold[2] : '#6d829e'; m.fillRect(z.door.x * 2, z.door.y * 2 - 1, 2, 1);
+  });
+  m.strokeStyle = 'rgba(232,238,247,.55)'; m.lineWidth = 1;
+  m.strokeRect(Math.round(cx / 8) + 0.5, Math.round(cy / 8) + 0.5, Math.round(bw / 8) - 1, Math.round(bh / 8) - 1);
+  if (Math.sin(time * 6) > -0.5) { m.fillStyle = '#4da3ff'; m.fillRect(Math.floor(player.x / 8) - 1, Math.floor(player.y / 8) - 1, 3, 3); m.fillStyle = '#e8eef7'; m.fillRect(Math.floor(player.x / 8), Math.floor(player.y / 8), 1, 1); }
+}
+
+// ---------- Movement ----------
+const solidAt = (px, py) => { const tx = Math.floor(px / T), ty = Math.floor(py / T); return !inside(tx, ty) || SOLID.has(map[idx(tx, ty)]); };
+const blocked = (x, y) => solidAt(x - 3.9, y - 3) || solidAt(x + 3.9, y - 3) || solidAt(x - 3.9, y + 0.9) || solidAt(x + 3.9, y + 0.9);
+const doorPos = z => ({ x: z.door.x * T + 8, y: z.door.y * T + 8 });
+
+function update(dt) {
+  time += dt;
+  fireflies.forEach(f => {
+    f.vx += (rand() - 0.5) * 20 * dt; f.vy += (rand() - 0.5) * 20 * dt;
+    f.vx *= 0.98; f.vy *= 0.98; f.x = (f.x + f.vx * dt + W * T) % (W * T); f.y = (f.y + f.vy * dt + H * T) % (H * T);
+  });
+  smokeT -= dt;
+  if (smokeT <= 0) {
+    smokeT = 0.32;
+    ZONES.forEach(z => (ART[z.kind].smoke || []).forEach(([sx, sy]) => smoke.push({ x: z.ox + sx + rand() * 2, y: z.oy + sy, vx: 3 + rand() * 3, vy: -9 - rand() * 4, r: 1, a: 0.9 })));
+  }
+  for (let i = smoke.length - 1; i >= 0; i--) { const p = smoke[i]; p.x += p.vx * dt + Math.sin(time * 2 + i) * 0.05; p.y += p.vy * dt; p.r += dt * 1.6; p.a -= dt * 0.28; if (p.a <= 0) smoke.splice(i, 1); }
+  birds.forEach(bd => {
+    const d = Math.hypot(player.x - bd.x, player.y - bd.y);
+    if (bd.st === 'idle') {
+      bd.peck = Math.max(0, bd.peck - dt); bd.t -= dt;
+      if (bd.t <= 0) { bd.t = 0.6 + rand() * 1.8; if (rand() < 0.5) bd.peck = 0.25; else { const nx = bd.x + (rand() - 0.5) * 8; if (Math.abs(nx - bd.hx) < 14) { bd.face = nx > bd.x ? 1 : -1; bd.x = nx; } } }
+      if (d < 34) { bd.st = 'fly'; bd.face = bd.x > player.x ? 1 : -1; bd.vx = bd.face * (45 + rand() * 20); bd.vy = -55 - rand() * 20; bd.t = 7; }
+    } else if (bd.st === 'fly') {
+      bd.x += bd.vx * dt; bd.y += bd.vy * dt; bd.vy += 4 * dt; bd.t -= dt;
+      if (bd.t <= 0 && Math.hypot(player.x - bd.hx, player.y - bd.hy) > 70) { bd.st = 'idle'; bd.x = bd.hx; bd.y = bd.hy; bd.t = 1; }
+    }
+  });
+  const cd = Math.hypot(player.x - cat.x, player.y - cat.y);
+  if (cd < 24 && cat.talk <= -2) cat.talk = 1.6; cat.talk -= dt;
+
+  if (panelZone) { player.moving = false; return; }
+  let vx = 0, vy = 0;
+  if (keys.has('left')) vx -= 1; if (keys.has('right')) vx += 1;
+  if (keys.has('up')) vy -= 1; if (keys.has('down')) vy += 1;
+  if (vx || vy) { path = null; pendingZone = null; }
+  else if (path && path.length) {
+    const [nx, ny] = path[0], tx = nx * T + 8, ty = ny * T + 10, dx = tx - player.x, dy = ty - player.y, d = Math.hypot(dx, dy);
+    if (d < 2) path.shift(); else { vx = dx / d; vy = dy / d; }
+  }
+  const len = Math.hypot(vx, vy);
+  player.moving = len > 0;
+  if (len) {
+    vx /= len; vy /= len;
+    const s = 74 * dt, ox = player.x, oy = player.y;
+    if (!blocked(player.x + vx * s, player.y)) player.x += vx * s;
+    if (!blocked(player.x, player.y + vy * s)) player.y += vy * s;
+    player.dir = Math.abs(vx) > Math.abs(vy) ? (vx < 0 ? 'left' : 'right') : (vy < 0 ? 'up' : 'down');
+    player.anim += dt;
+    stuck = (Math.abs(player.x - ox) + Math.abs(player.y - oy) < 0.01) ? stuck + dt : 0;
+    if (stuck > 0.35) { path = null; stuck = 0; }
+  }
+  nearZone = ZONES.find(z => { const p = doorPos(z); return Math.hypot(p.x - player.x, p.y - player.y) < 16; }) || null;
+  if (path && !path.length) path = null;
+  if (!path && pendingZone) { if (nearZone === pendingZone) openZone(pendingZone); pendingZone = null; }
+  const pr = document.getElementById('prompt');
+  if (nearZone && !panelZone) { pr.hidden = false; pr.textContent = `[E] Enter ${nearZone.name}`; } else pr.hidden = true;
+}
+
+function walkTo(tx, ty) {
+  const sx = Math.floor(player.x / T), sy = Math.floor(player.y / T);
+  path = bfs(sx, sy, tx, ty, walkable);
+}
+
+// ---------- Panel, toast, text view ----------
+const overlay = document.getElementById('overlay');
+function openZone(z) {
+  panelZone = z; keys.clear(); path = null;
+  document.getElementById('panel-title').textContent = `⟨ ${z.name.toUpperCase()} ⟩`;
+  document.getElementById('panel-sub').textContent = z.sub;
+  document.getElementById('panel-body').innerHTML = z.html;
+  document.getElementById('panel-body').scrollTop = 0;
+  overlay.hidden = false;
+  document.getElementById('panel-close').focus();
+  if (!discovered.has(z.id)) {
+    discovered.add(z.id);
+    document.getElementById('zones').textContent = discovered.size;
+    toast(discovered.size === ZONES.length ? '◆ Achievement: Cartographer. Every zone discovered.' : `◆ Zone discovered: ${z.name} (${discovered.size}/8)`);
+  }
+}
+function closePanel() { overlay.hidden = true; panelZone = null; view.focus(); }
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.querySelector('.body').textContent = msg; el.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+}
+document.getElementById('panel-close').addEventListener('click', closePanel);
+overlay.addEventListener('click', e => { if (e.target === overlay) closePanel(); });
+document.getElementById('prompt').addEventListener('click', () => nearZone && openZone(nearZone));
+
+document.getElementById('text-sections').innerHTML = ZONES.map(z =>
+  `<section class="win" id="tv-${z.id}"><div class="bar"><span>⟨ ${z.name.toUpperCase()} ⟩</span><span class="dot">${z.sub}</span></div><div class="body">${z.html}</div></section>`).join('');
+const stage = document.getElementById('stage'), textView = document.getElementById('text-view'), skip = document.getElementById('skip');
+function setTextView(on) {
+  textView.hidden = !on; stage.hidden = on;
+  skip.textContent = on ? 'Back to map' : 'Skip to text view';
+  if (on) { textView.tabIndex = -1; textView.focus(); } else { resize(); view.focus(); }
+}
+skip.addEventListener('click', e => { e.preventDefault(); setTextView(textView.hidden); });
+document.getElementById('back-to-map').addEventListener('click', e => { e.preventDefault(); setTextView(false); });
+
+// ---------- Input ----------
+const KEYMAP = { ArrowLeft: 'left', a: 'left', A: 'left', ArrowRight: 'right', d: 'right', D: 'right', ArrowUp: 'up', w: 'up', W: 'up', ArrowDown: 'down', s: 'down', S: 'down' };
+window.addEventListener('keydown', e => {
+  if (!textView.hidden) return;
+  if (panelZone) { if (e.key === 'Escape') closePanel(); return; }
+  const onUi = document.activeElement && document.activeElement !== view && document.activeElement !== document.body;
+  if (KEYMAP[e.key]) { keys.add(KEYMAP[e.key]); if (!onUi) e.preventDefault(); return; }
+  if (!onUi && (e.key === 'e' || e.key === 'E' || e.key === 'Enter' || e.key === ' ')) {
+    e.preventDefault(); if (nearZone) openZone(nearZone);
+  }
+});
+window.addEventListener('keyup', e => { if (KEYMAP[e.key]) keys.delete(KEYMAP[e.key]); });
+window.addEventListener('blur', () => keys.clear());
+view.addEventListener('pointerdown', e => {
+  view.focus();
+  if (panelZone) return;
+  const r = view.getBoundingClientRect();
+  const wx = cam.ix + (e.clientX - r.left) / scale, wy = cam.iy + (e.clientY - r.top) / scale;
+  const hit = ZONES.find(z => wx >= z.x * T - 8 && wx < (z.x + z.w) * T + 8 && wy >= z.oy + z.artTop && wy < (z.y + z.h) * T);
+  if (hit) {
+    if (nearZone === hit) { openZone(hit); return; }
+    pendingZone = hit; walkTo(hit.door.x, hit.door.y); return;
+  }
+  const tx = Math.floor(wx / T), ty = Math.floor(wy / T);
+  pendingZone = null;
+  if (walkable(tx, ty)) walkTo(tx, ty);
+});
+
+// ---------- Loop ----------
+resize();
+view.focus();
+let last = performance.now();
+function frame(now) {
+  const dt = Math.max(0, Math.min(0.05, (now - last) / 1000)); last = now;
+  if (stage.hidden) { requestAnimationFrame(frame); return; }
+  update(dt); render();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+toast('◇ Eight zones. Walk up to one and press E.');
+</script>
+</body>
+</html>

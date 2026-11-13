@@ -1,0 +1,146 @@
+/* PROTOTYPE. Styles for the 3D world (world3d.js). Everything is scoped to body.w3d,
+   so ?mode=text gives back the plain page untouched. */
+
+.w3d-mode {
+  font: inherit; font-size: 11px; letter-spacing: .12em; color: var(--dim); text-decoration: none;
+  border: 1px solid var(--line); background: rgba(9, 16, 30, .82); padding: 6px 10px; border-radius: 3px;
+}
+.w3d-mode:hover { color: var(--sys); border-color: var(--line-bright); text-decoration: none; }
+body:not(.w3d) > .w3d-mode { position: fixed; right: 16px; bottom: 44px; z-index: 91; color: var(--gold); }
+
+body.w3d { overflow: hidden; height: 100%; background: #05070f; }
+body.w3d .app, body.w3d .foot, body.w3d .gp-banner { display: none; }
+.w3d-canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; outline: none; }
+body.w3d .gp-toasts { top: 58px; }
+body.w3d.w3d-panel .gp-toasts { top: auto; bottom: 64px; }
+body.w3d.w3d-fighting .gp-toasts { top: 136px; }
+kbd { font: inherit; }
+
+/* ---------- HUD ---------- */
+.w3d-hud { position: fixed; inset: 0; z-index: 20; pointer-events: none; font-size: 11px; letter-spacing: .08em; }
+.w3d-hud button, .w3d-hud a { pointer-events: auto; }
+.w3d-hud kbd, .w3d-close kbd, .w3d-battle kbd {
+  display: inline-block; min-width: 18px; padding: 0 5px; margin-left: 4px; text-align: center;
+  border: 1px solid var(--line-bright); border-radius: 3px; color: var(--sys); background: rgba(13, 22, 41, .9); font-size: 10px;
+}
+.w3d-card {
+  position: absolute; left: 16px; top: 16px; width: 300px; padding: 10px 12px 9px 86px; min-height: 84px;
+  background: var(--panel); border: 1px solid var(--line); box-shadow: 0 0 24px var(--glow), inset 0 0 24px rgba(77, 163, 255, .04);
+}
+.w3d-face { position: absolute; left: 10px; top: 10px; width: 64px; height: 64px; image-rendering: pixelated; background: #0b1326; border: 1px solid var(--line-bright); }
+.w3d-who { display: flex; justify-content: space-between; align-items: baseline; color: #e8eef7; font-size: 12px; }
+.w3d-lv { color: var(--gold); }
+.w3d-xp { height: 6px; margin: 6px 0 7px; background: #0b1326; border: 1px solid var(--line); }
+.w3d-xp i { display: block; height: 100%; background: linear-gradient(90deg, var(--sys), #9fd0ff); transition: width .5s; }
+.w3d-stats { color: var(--dim); font-size: 10px; line-height: 1.5; }
+.w3d-stats b { color: var(--text); font-weight: 500; }
+.w3d-worldline { color: var(--dim); font-size: 9.5px; margin-top: 3px; opacity: .8; }
+.w3d-top { position: absolute; right: 16px; top: 16px; display: flex; gap: 8px; align-items: center; }
+.w3d-top button {
+  font: inherit; letter-spacing: .12em; color: var(--text); cursor: pointer;
+  border: 1px solid var(--line); background: rgba(9, 16, 30, .82); padding: 5px 10px; border-radius: 3px;
+}
+.w3d-top button:hover { border-color: var(--line-bright); color: #fff; }
+.w3d-map { position: absolute; right: 16px; bottom: 16px; width: 96px; height: 158px; image-rendering: pixelated; background: rgba(9, 16, 30, .6); border: 1px solid var(--line); }
+.w3d-keys { position: absolute; left: 16px; bottom: 34px; color: var(--dim); font-size: 10px; text-shadow: 0 1px 3px #000; }
+.w3d-proto { position: absolute; left: 16px; bottom: 14px; color: var(--dim); font-size: 10px; opacity: .75; text-shadow: 0 1px 3px #000; }
+.w3d-proto b { color: var(--gold); font-weight: 600; }
+.w3d-prompt {
+  position: absolute; left: 50%; bottom: 14%; transform: translate(-50%, 8px); opacity: 0; transition: opacity .15s, transform .15s;
+  padding: 8px 16px 8px 10px; font-size: 13px; color: #e8eef7; white-space: nowrap;
+  background: rgba(9, 16, 30, .92); border: 1px solid var(--line-bright); box-shadow: 0 0 22px var(--glow);
+}
+.w3d-prompt.on { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; cursor: pointer; }
+.w3d-prompt kbd { margin: 0 8px 0 0; font-size: 12px; color: var(--gold); border-color: var(--gold); }
+.w3d-stick { display: none; position: absolute; width: 96px; height: 96px; margin: -48px 0 0 -48px; border-radius: 50%; border: 1px solid var(--line-bright); background: rgba(13, 22, 41, .35); }
+.w3d-stick i { position: absolute; left: 28px; top: 28px; width: 40px; height: 40px; border-radius: 50%; background: rgba(77, 163, 255, .55); }
+.w3d-pad { display: none; position: absolute; right: 18px; bottom: 26px; gap: 12px; align-items: flex-end; }
+.w3d-pad button { font: inherit; width: 66px; height: 66px; border-radius: 50%; color: #e8eef7; background: rgba(13, 22, 41, .7); border: 1px solid var(--line-bright); font-size: 12px; letter-spacing: .1em; }
+.w3d-pad button[data-a="act"] { width: 78px; height: 78px; color: var(--gold); border-color: var(--gold); font-size: 20px; }
+
+/* ---------- labels pinned to the world ---------- */
+.w3d-labels { position: fixed; inset: 0; z-index: 15; pointer-events: none; overflow: hidden; }
+.w3d-label { position: absolute; left: 0; top: 0; white-space: nowrap; will-change: transform; }
+.w3d-plaque { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: #e8eef7; padding: 3px 9px 3px 5px; background: rgba(9, 16, 30, .82); border: 1px solid var(--line-bright); box-shadow: 0 0 14px var(--glow); }
+.w3d-plaque span { display: inline-block; width: 15px; margin-right: 6px; text-align: center; color: #0a0e1a; background: var(--sys); font-weight: 700; }
+.w3d-plaque.seen { color: var(--dim); border-color: var(--line); box-shadow: none; }
+.w3d-plaque.seen span { background: var(--gold); }
+.w3d-plate { text-align: center; font-size: 10.5px; letter-spacing: .1em; padding: 3px 8px; background: rgba(20, 9, 16, .82); border: 1px solid #7a2a3a; }
+.w3d-plate b { display: block; color: #ffe2e6; font-weight: 600; text-transform: uppercase; }
+.w3d-plate small { color: #ff8f9c; font-size: 9.5px; }
+.w3d-plate.seen { border-color: var(--line); background: rgba(9, 16, 30, .8); }
+.w3d-plate.seen b { color: var(--dim); } .w3d-plate.seen small { color: var(--gold); }
+.w3d-bubble { max-width: 250px; white-space: normal; font-size: 12px; line-height: 1.45; color: #10182c; background: #e8eef7; padding: 6px 10px; border-radius: 3px; box-shadow: 0 4px 0 rgba(0, 0, 0, .35); }
+.w3d-float { font-size: 20px; font-weight: 700; letter-spacing: .06em; color: #fff; text-shadow: 0 2px 0 #000, 0 0 12px rgba(0, 0, 0, .8); animation: w3dFloat 1.2s ease-out forwards; }
+.w3d-float.crit { font-size: 28px; color: #ffd76a; }
+.w3d-float.miss { color: #8a9bb3; font-size: 16px; }
+.w3d-float.heal { color: #5fd38d; font-size: 16px; }
+@keyframes w3dFloat { 0% { opacity: 0; } 12% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; } }
+
+/* ---------- section panels: the real page content, over the world ---------- */
+body.w3d.w3d-panel .app {
+  display: block; position: fixed; inset: 0; z-index: 40; max-width: none; height: auto; margin: 0;
+  padding: 64px 16px 84px; overflow-y: auto; overscroll-behavior: contain;
+  background: rgba(5, 8, 16, .74); backdrop-filter: blur(3px);
+}
+body.w3d.w3d-panel .side, body.w3d.w3d-panel .player-hud { display: none; }
+body.w3d.w3d-panel .main { display: block; max-width: 880px; height: auto; margin: 0 auto; overflow: visible; }
+body.w3d.w3d-panel .section.active { overflow: visible; }
+body.w3d.w3d-panel .foot { display: flex; z-index: 45; }
+.w3d-close {
+  display: none; position: fixed; right: 16px; top: 16px; z-index: 46; font: inherit; font-size: 11px; letter-spacing: .12em; cursor: pointer;
+  color: var(--gold); background: rgba(9, 16, 30, .95); border: 1px solid var(--gold); padding: 7px 12px; border-radius: 3px;
+}
+body.w3d-panel .w3d-close { display: block; }
+body.w3d-panel .w3d-hud, body.w3d-panel .w3d-labels { display: none; }
+/* after a fight the loot is one Raid Log entry, not the whole log */
+#raid-log.w3d-one .entry:not(.w3d-show) { display: none; }
+#raid-log.w3d-one .entry.w3d-show { border-color: var(--gold); }
+
+/* ---------- battles ---------- */
+.w3d-fade { position: fixed; inset: 0; z-index: 60; background: #05070f; opacity: 0; pointer-events: none; transition: opacity .28s; }
+.w3d-fade.on { opacity: 1; }
+.w3d-battle { display: none; position: fixed; inset: 0; z-index: 25; pointer-events: none; }
+body.w3d-fighting .w3d-battle { display: block; }
+body.w3d-fighting .w3d-hud > :not(.w3d-pad) { display: none; }
+.w3d-bar { height: 9px; background: #0b1326; border: 1px solid var(--line-bright); }
+.w3d-bar i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #ff5d6c, #ff9f6b); transition: width .45s cubic-bezier(.2, .8, .2, 1); }
+.w3d-foe { position: absolute; right: 5%; top: 22px; width: min(440px, 62vw); text-align: right; }
+.w3d-foe-top { display: flex; gap: 10px; align-items: baseline; justify-content: flex-end; flex-wrap: wrap; margin-bottom: 5px; text-shadow: 0 2px 4px #000; }
+.w3d-foe .tag { color: var(--gold); font-size: 11px; letter-spacing: .12em; }
+.w3d-foe b { color: #fff; font-size: 17px; letter-spacing: .08em; text-transform: uppercase; }
+.w3d-foe .story { flex-basis: 100%; color: var(--dim); font-size: 11.5px; }
+.w3d-foe .hp { display: block; margin-top: 4px; color: #ffb3bb; font-size: 11px; letter-spacing: .08em; text-shadow: 0 1px 3px #000; }
+.w3d-you { position: absolute; left: 5%; top: 30px; width: min(200px, 28vw); color: #e8eef7; font-size: 11px; letter-spacing: .14em; text-shadow: 0 1px 3px #000; }
+.w3d-you .w3d-bar { margin-top: 5px; } .w3d-you .w3d-bar i { background: linear-gradient(90deg, #4da3ff, #9fd0ff); }
+.w3d-dialog.win { position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%); width: min(760px, calc(100vw - 28px)); margin: 0; opacity: 1; pointer-events: auto; cursor: pointer; animation: none; }
+.w3d-dialog.win .bar, .w3d-dialog.win .body { opacity: 1; animation: none; }
+.w3d-dialog .body { min-height: 92px; padding: 14px 20px 26px; }
+.w3d-dialog .txt { font-size: 15px; line-height: 1.6; color: #e8eef7; margin: 0; }
+.w3d-battle[data-who="foe"] .who { color: #ff8f9c; } .w3d-battle[data-who="you"] .who { color: var(--sys); } .w3d-battle[data-who="sys"] .who { color: var(--gold); }
+.w3d-dialog .next { position: absolute; right: 14px; bottom: 8px; font-size: 11px; color: var(--gold); opacity: 0; }
+.w3d-dialog .next.on { opacity: 1; animation: w3dBlink 1s steps(2) infinite; }
+@keyframes w3dBlink { 50% { opacity: .35; } }
+.w3d-skip { position: absolute; right: 16px; bottom: 160px; pointer-events: auto; cursor: pointer; font: inherit; font-size: 10px; letter-spacing: .12em; color: var(--dim); background: rgba(9, 16, 30, .8); border: 1px solid var(--line); padding: 5px 9px; border-radius: 3px; }
+.w3d-skip:hover { color: var(--text); border-color: var(--line-bright); }
+
+/* ---------- touch and small screens ---------- */
+@media (pointer: coarse) {
+  .w3d-pad { display: flex; }
+  .w3d-map, .w3d-keys, .w3d-prompt kbd, .w3d-dialog .next kbd, .w3d-top kbd, .w3d-close kbd { display: none; }
+  .w3d-prompt { bottom: 21%; }
+}
+@media (max-width: 700px) {
+  .w3d-card { left: 8px; top: 8px; width: 190px; padding: 8px 9px 8px 60px; min-height: 60px; }
+  .w3d-face { left: 7px; top: 7px; width: 44px; height: 44px; }
+  .w3d-worldline, .w3d-keys, .w3d-proto { display: none; }
+  .w3d-top { right: 8px; top: 8px; gap: 5px; flex-direction: column; align-items: flex-end; }
+  .w3d-map { right: 8px; bottom: auto; top: 112px; width: 60px; height: 99px; }
+  .w3d-dialog .txt { font-size: 13.5px; }
+  .w3d-foe { top: 76px; right: 12px; } .w3d-you { top: 76px; left: 12px; }
+  .w3d-skip { bottom: 172px; right: 12px; }
+  body.w3d.w3d-panel .app { padding: 56px 10px 110px; }
+  body.w3d .gp-toasts { top: 124px; }
+  body.w3d.w3d-fighting .gp-toasts { top: 200px; }
+}
+@media (prefers-reduced-motion: reduce) { .w3d-fade, .w3d-xp i, .w3d-bar i { transition: none; } }

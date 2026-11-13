@@ -1,0 +1,162 @@
+/* PROTOTYPE game layer. Throwaway. Uses the site's own tokens. */
+
+/* ---------- prototype banner ---------- */
+.gp-banner {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 90;
+  display: flex; gap: 14px; align-items: center; justify-content: center; flex-wrap: wrap;
+  padding: 7px 16px;
+  background: rgba(9, 16, 30, .96);
+  border-top: 1px solid var(--line);
+  font-size: 11px; letter-spacing: .12em; color: var(--dim);
+}
+.gp-banner b { color: var(--gold); font-weight: 600; }
+.gp-banner a, .gp-banner button {
+  color: var(--sys); background: none; border: 1px solid var(--line); font: inherit;
+  letter-spacing: inherit; padding: 2px 8px; cursor: pointer; text-decoration: none;
+}
+.gp-banner a:hover, .gp-banner button:hover { border-color: var(--line-bright); }
+@media (min-width: 901px) { .app { height: calc(100dvh - 57px - 34px) !important; } }
+
+/* ---------- visitor status ---------- */
+.gp-visitor .body { padding: 12px 16px; font-size: 12px; }
+.gp-visitor .gp-vname { color: #e8f4ff; font-weight: 700; letter-spacing: .1em; }
+.gp-visitor .gp-vlv { color: var(--sys); float: right; }
+.gp-meter { position: relative; height: 6px; margin: 8px 0 10px; background: #0d1729; border: 1px solid var(--line); }
+.gp-meter i { position: absolute; inset: 0 auto 0 0; width: 0; background: linear-gradient(90deg, var(--sys), var(--gold)); transition: width .6s cubic-bezier(.16,1,.3,1); }
+.gp-visitor .row { display: flex; justify-content: space-between; padding: 1px 0; }
+.gp-visitor .row .k { color: var(--dim); letter-spacing: .1em; }
+.gp-visitor .row .v { color: var(--sys); }
+.gp-world { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line); color: var(--dim); font-size: 11px; line-height: 1.55; }
+.gp-world b { color: var(--gold); font-weight: 600; }
+.gp-mock { color: #8a6f3a; font-size: 10px; letter-spacing: .1em; }
+.gp-vbtn {
+  display: block; width: 100%; margin-top: 10px; padding: 4px 0;
+  background: none; border: 1px solid var(--line); color: var(--sys);
+  font: inherit; font-size: 11px; letter-spacing: .12em; cursor: pointer;
+}
+.gp-vbtn:hover { border-color: var(--gold); color: var(--gold); }
+
+/* zone discovery marks in the menu */
+.menu-list a.gp-unseen::after { content: 'NEW'; color: var(--gold); font-size: 9px; letter-spacing: .1em; margin-left: 6px; animation: gpPulse 1.6s ease-in-out infinite; }
+.menu-list a.gp-seen::after { content: '✓'; color: #3b5f8f; font-size: 10px; margin-left: 6px; }
+@keyframes gpPulse { 50% { opacity: .35; } }
+
+/* ---------- toasts ---------- */
+.gp-toasts { position: fixed; top: 16px; right: 16px; z-index: 100; display: flex; flex-direction: column; gap: 10px; pointer-events: none; max-width: min(340px, calc(100vw - 32px)); }
+.gp-toast {
+  position: relative; padding: 10px 14px 10px 46px;
+  background: rgba(9, 16, 30, .97); border: 1px solid var(--gold);
+  box-shadow: 0 0 22px rgba(217,180,91,.25);
+  font-size: 12px; line-height: 1.5;
+  animation: gpToastIn .45s cubic-bezier(.16,1,.3,1), gpToastOut .4s ease-in 3.6s forwards;
+}
+.gp-toast.xp { border-color: var(--line-bright); box-shadow: 0 0 18px var(--glow); padding-left: 14px; }
+.gp-toast .gp-ico { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 20px; color: var(--gold); }
+.gp-toast .gp-th { color: var(--gold); letter-spacing: .14em; font-size: 10.5px; }
+.gp-toast.xp .gp-th { color: var(--sys); }
+.gp-toast .gp-tb { color: #e8eef7; }
+@keyframes gpToastIn { from { opacity: 0; transform: translateX(30px) scaleY(.2); } }
+@keyframes gpToastOut { to { opacity: 0; transform: translateX(30px); } }
+
+/* ---------- overlay windows (quest log, command bar) ---------- */
+.gp-overlay {
+  position: fixed; inset: 0; z-index: 95; display: none;
+  align-items: flex-start; justify-content: center; padding: 12vh 16px 16px;
+  background: rgba(5, 8, 16, .66); backdrop-filter: blur(3px);
+}
+.gp-overlay.open { display: flex; }
+.gp-overlay .win { width: 100%; max-width: 620px; margin: 0; opacity: 1; transform: none; }
+.gp-overlay .win .bar, .gp-overlay .win .body { opacity: 1; }
+.gp-quests li { list-style: none; display: flex; gap: 10px; padding: 3px 0; font-size: 13px; }
+.gp-quests li .gp-ck { color: var(--dim); width: 18px; flex-shrink: 0; }
+.gp-quests li.done .gp-ck { color: var(--gold); }
+.gp-quests li.done .gp-qn { color: var(--dim); text-decoration: line-through; text-decoration-color: #3b5f8f; }
+.gp-quests li .gp-qx { margin-left: auto; color: var(--sys); font-size: 11px; }
+.gp-quests h4 { color: var(--sys); font-size: 11px; letter-spacing: .14em; font-weight: 400; margin: 14px 0 4px; }
+.gp-quests h4:first-child { margin-top: 0; }
+
+.gp-cmd .body { padding: 0; }
+.gp-cmd-out { max-height: 46vh; overflow-y: auto; padding: 12px 16px 4px; font-size: 13px; white-space: pre-wrap; }
+.gp-cmd-out .in { color: var(--gold); }
+.gp-cmd-out .err { color: #ff6b7d; }
+.gp-cmd-out .dim { color: var(--dim); }
+.gp-cmd-row { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-top: 1px solid var(--line); }
+.gp-cmd-row span { color: var(--gold); }
+.gp-cmd-row input { flex: 1; background: none; border: 0; outline: 0; color: #e8f4ff; font: inherit; font-size: 14px; }
+.gp-hint { color: var(--dim); font-size: 11px; letter-spacing: .08em; }
+
+/* konami easter egg */
+body.gp-gold { --sys: #d9b45b; --line: #5a4a24; --line-bright: #b8923f; --glow: rgba(217,180,91,.16); }
+
+@media (max-width: 900px) {
+  /* the sidebar collapses to a top bar on phones; stats live in the quest log there */
+  .gp-visitor { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gp-toast { animation: gpToastOut .4s ease-in 3.6s forwards; }
+  .menu-list a.gp-unseen::after { animation: none; }
+}
+
+@media (max-width: 600px) {
+  .gp-banner { gap: 6px; padding: 6px 8px; flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; font-size: 10px; }
+  .gp-banner > span { display: none; }
+  .gp-banner a, .gp-banner button { white-space: nowrap; }
+}
+
+.gp-quests { max-height: 72vh; overflow-y: auto; }
+
+/* ---------- raid battles (raid.js) ---------- */
+#raid-log .entry { position: relative; }
+.gp-enc {
+  --aura: var(--sys);
+  position: relative; margin: 8px 0 14px;
+  border: 1px solid var(--line); background: #05070d;
+  box-shadow: 0 0 0 1px #05070d, 0 0 0 2px #16294a, 0 0 22px rgba(77,163,255,.07);
+}
+.gp-enc::before, .gp-enc::after { content: ''; position: absolute; width: 6px; height: 6px; border: 2px solid var(--gold); z-index: 2; pointer-events: none; }
+.gp-enc::before { top: -3px; left: -3px; border-right: 0; border-bottom: 0; }
+.gp-enc::after { bottom: -3px; right: -3px; border-left: 0; border-top: 0; }
+.gp-plates { display: flex; gap: 14px; justify-content: space-between; align-items: center; padding: 6px 10px; background: linear-gradient(#0d172b, #080f1d); border-bottom: 1px solid var(--line); }
+.gp-plate { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; }
+.gp-plate.boss { flex: 1; }
+.gp-plate.you { flex: 0 1 28%; }
+.gp-pn { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 700; }
+.gp-plate.boss .gp-pn { color: #ffb3bb; }
+.gp-plate.you .gp-pn { color: #9fd0ff; }
+.gp-seg { position: relative; flex: 1; min-width: 50px; height: 9px; background: #12080d; border: 1px solid #4a1f2c; box-shadow: inset 0 0 0 1px #05070d; }
+.gp-plate.you .gp-seg { border-color: #1d4a35; background: #07120d; }
+.gp-seg i { position: absolute; top: 1px; bottom: 1px; left: 1px; width: 100%; max-width: calc(100% - 2px); transition: width .3s steps(12); }
+.gp-seg .lag { background: #fff1c2; transition: width .5s ease .1s; }
+.gp-seg .cur { background: linear-gradient(#ff9aa6 0 30%, #ff4d6a 30% 75%, #b8233e 75%); }
+.gp-plate.you .gp-seg .cur { background: linear-gradient(#a6f0c0 0 30%, #38a865 30% 75%, #1a6640 75%); }
+.gp-seg::after { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, transparent 0 6px, #05070d 6px 7px); pointer-events: none; }
+.gp-pv { color: var(--dim); white-space: nowrap; font-size: 10px; }
+.gp-stage { display: flex; justify-content: center; overflow: hidden; background: #05070d; }
+.gp-stage canvas { display: block; flex-shrink: 0; image-rendering: pixelated; image-rendering: crisp-edges; cursor: pointer; }
+.gp-dlg {
+  display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap;
+  padding: 10px 12px; min-height: 64px;
+  background: linear-gradient(#0a1426, #070d1a); border-top: 2px solid #16294a;
+  box-shadow: inset 0 1px 0 #05070d, inset 0 0 0 1px rgba(77,163,255,.06);
+}
+.gp-who { flex-shrink: 0; padding: 1px 7px; font-size: 10px; letter-spacing: .16em; border: 1px solid currentColor; line-height: 1.6; margin-top: 2px; }
+.gp-who.sys { color: var(--gold); }
+.gp-who.hero { color: #9fd0ff; }
+.gp-who.boss { color: #ff8f9c; }
+.gp-say { flex: 1 1 220px; margin: 0 !important; color: #e8eef7; font-size: 13px; line-height: 1.6; min-height: 2.6em; }
+.gp-say.done::after { content: ' ▼'; color: var(--gold); font-size: 10px; animation: gpPulse 1s steps(2) infinite; }
+.gp-act { margin-left: auto; align-self: flex-end; background: rgba(217,180,91,.06); border: 1px solid var(--gold); color: var(--gold); font: inherit; font-size: 11px; letter-spacing: .14em; padding: 4px 12px; cursor: pointer; box-shadow: 2px 2px 0 #05070d; }
+.gp-act:hover:not(:disabled) { background: rgba(217,180,91,.16); }
+.gp-act:disabled { opacity: .35; cursor: default; }
+.gp-lootfly { position: fixed; left: 0; top: 0; width: 10px; height: 10px; margin: -5px 0 0 -5px; z-index: 120; pointer-events: none; background: #d9b45b; box-shadow: 0 0 0 2px #05070d, 0 0 14px 4px rgba(217,180,91,.7); }
+.entry .result.gp-loot { position: relative; padding: 6px 10px; border: 1px solid transparent; transition: border-color .4s, box-shadow .4s, background .4s; }
+.entry .result.gp-loot::before { content: 'LOOT'; display: inline-block; margin-right: 8px; color: #3b5f8f; font-size: 10px; letter-spacing: .14em; }
+.entry .result.gp-loot.got { border-color: var(--gold); background: rgba(217,180,91,.06); box-shadow: 0 0 18px rgba(217,180,91,.18); animation: gpLoot .6s ease-out; }
+.entry .result.gp-loot.got::before { content: '✦ LOOT'; color: var(--gold); }
+.entry.gp-cleared .tag::after { content: '  · CLEARED'; color: var(--sys); }
+@keyframes gpLoot { 0% { box-shadow: 0 0 0 0 rgba(217,180,91,.9); } 100% { box-shadow: 0 0 18px rgba(217,180,91,.18); } }
+@media (max-width: 600px) {
+  .gp-plate.you { display: none; }
+  .gp-say { font-size: 12.5px; }
+}
+@media (prefers-reduced-motion: reduce) { .entry .result.gp-loot.got { animation: none; } .gp-say.done::after { animation: none; } }
