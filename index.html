@@ -1115,8 +1115,14 @@
 
   // intro popup: play once per session
   const intro = document.getElementById('intro');
-  const dismiss = () => { intro.classList.add('hide'); sessionStorage.setItem('introSeen', '1'); };
-  if (sessionStorage.getItem('introSeen') || reduced) {
+  // storage can throw (blocked site data, sandboxed frames); the intro must still dismiss
+  let introSeen = false;
+  try { introSeen = !!sessionStorage.getItem('introSeen'); } catch {}
+  const dismiss = () => {
+    intro.classList.add('hide');
+    try { sessionStorage.setItem('introSeen', '1'); } catch {}
+  };
+  if (introSeen || reduced) {
     intro.classList.add('hide');
   } else {
     intro.addEventListener('click', dismiss);
